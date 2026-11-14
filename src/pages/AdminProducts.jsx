@@ -11,9 +11,7 @@ import {
   Save,
   ArrowRight,
 } from "lucide-react";
-import { products as initialProducts } from "../data/products";
-
-const STORAGE_KEY = "nik-market-admin-products";
+import useShopStore from "../store/useShopStore";
 
 const emptyProduct = {
   title: "",
@@ -25,53 +23,18 @@ const emptyProduct = {
   image: "",
 };
 
-function normalizeProducts(items) {
-  if (!Array.isArray(items)) {
-    return initialProducts;
-  }
-
-  return items
-    .filter((product) => product && typeof product === "object")
-    .map((product, index) => ({
-      ...product,
-      id: product.id ?? Date.now() + index,
-      title: String(product.title ?? product.name ?? ""),
-      category: String(product.category ?? "دیجیتال"),
-      price: Number(product.price) || 0,
-      oldPrice: Number(product.oldPrice) || 0,
-      discount: Number(product.discount) || 0,
-      rating: Number(product.rating) || 5,
-      image: String(product.image ?? ""),
-    }));
-}
-
-function getProducts() {
-  try {
-    const savedProducts = localStorage.getItem(STORAGE_KEY);
-
-    if (savedProducts) {
-      return normalizeProducts(JSON.parse(savedProducts));
-    }
-  } catch {
-    return initialProducts;
-  }
-
-  return normalizeProducts(initialProducts);
-}
-
 function AdminProducts() {
-  const [products, setProducts] = useState(getProducts);
+  const products = useShopStore((state) => state.products);
+  const addProduct = useShopStore((state) => state.addProduct);
+  const updateProduct = useShopStore((state) => state.updateProduct);
+  const deleteProduct = useShopStore((state) => state.deleteProduct);
+
   const [search, setSearch] = useState("");
   const [form, setForm] = useState(emptyProduct);
   const [editingId, setEditingId] = useState(null);
   const [message, setMessage] = useState("");
   const [showForm, setShowForm] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
-
-  function saveProducts(updatedProducts) {
-    setProducts(updatedProducts);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedProducts));
-  }
 
   function handleChange(event) {
     const { name, value } = event.target;
@@ -91,13 +54,13 @@ function AdminProducts() {
 
   function openEditForm(product) {
     setForm({
-      title: product.title,
-      category: product.category,
-      price: String(product.price),
-      oldPrice: String(product.oldPrice || ""),
-      discount: String(product.discount || ""),
-      rating: String(product.rating || "5"),
-      image: product.image,
+      title: product.name ?? product.title ?? "",
+      category: product.category ?? "دیجیتال",
+      price: String(product.price ?? ""),
+      oldPrice: String(product.oldPrice ?? ""),
+      discount: String(product.discount ?? ""),
+      rating: String(product.rating ?? "5"),
+      image: product.image ?? "",
     });
 
     setEditingId(product.id);
@@ -109,6 +72,7 @@ function AdminProducts() {
     event.preventDefault();
 
     const productData = {
+      name: form.title.trim(),
       title: form.title.trim(),
       category: form.category,
       price: Number(form.price),
@@ -119,7 +83,7 @@ function AdminProducts() {
     };
 
     if (
-      !productData.title ||
+      !productData.name ||
       !productData.image ||
       !Number.isFinite(productData.price) ||
       productData.price <= 0
@@ -128,47 +92,27 @@ function AdminProducts() {
       return;
     }
 
-    let updatedProducts;
-
     if (editingId !== null) {
-      updatedProducts = products.map((product) =>
-        product.id === editingId
-          ? { ...product, ...productData }
-          : product
-      );
+      updateProduct(editingId, productData);
+      setMessage("محصول با موفقیت ویرایش شد.");
     } else {
-      updatedProducts = [
-        {
-          id: Date.now(),
-          ...productData,
-        },
-        ...products,
-      ];
+      addProduct(productData);
+      setMessage("محصول جدید با موفقیت اضافه شد.");
     }
 
-    saveProducts(updatedProducts);
     setShowForm(false);
     setForm(emptyProduct);
     setEditingId(null);
-    setMessage(
-      editingId !== null
-        ? "محصول با موفقیت ویرایش شد."
-        : "محصول جدید با موفقیت اضافه شد."
-    );
   }
 
   function handleDelete(productId) {
-    const updatedProducts = products.filter(
-      (product) => product.id !== productId
-    );
-
-    saveProducts(updatedProducts);
+    deleteProduct(productId);
     setDeleteId(null);
     setMessage("محصول با موفقیت حذف شد.");
   }
 
   const filteredProducts = products.filter((product) =>
-    String(product.title ?? "")
+    String(product.name ?? product.title ?? "")
       .toLowerCase()
       .includes(search.trim().toLowerCase())
   );
@@ -446,12 +390,12 @@ function AdminProducts() {
                           {product.image && (
                             <img
                               src={product.image}
-                              alt={product.title}
+                              alt={product.name}
                               className="h-12 w-12 rounded-lg object-cover"
                             />
                           )}
                           <span className="font-semibold text-gray-700">
-                            {product.title || "بدون نام"}
+                            {product.name || "بدون نام"}
                           </span>
                         </div>
                       </td>

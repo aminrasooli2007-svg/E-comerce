@@ -1,18 +1,19 @@
+
 import { useState } from "react";
 import { Search } from "lucide-react";
-
 import Header from "../components/layout/Header";
 import Footer from "../components/layout/Footer";
 import ProductCard from "../components/common/ProductCard";
-
-import { products } from "../data/products";
+import useShopStore from "../store/useShopStore";
 
 function Products() {
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("همه");
+  const products = useShopStore((state) => state.products);
 
   const filteredProducts = products.filter((product) => {
-    const matchesSearch = product.name
+    const productName = String(product.name ?? product.title ?? "");
+    const matchesSearch = productName
       .toLowerCase()
       .includes(search.toLowerCase());
 
@@ -57,11 +58,7 @@ function Products() {
 
         {filteredProducts.length === 0 && (
           <div className="py-20 text-center">
-            <Search
-              className="mx-auto mb-3 text-gray-400"
-              size={32}
-            />
-
+            <Search className="mx-auto mb-3 text-gray-400" size={32} />
             <p className="font-bold">محصولی پیدا نشد.</p>
           </div>
         )}

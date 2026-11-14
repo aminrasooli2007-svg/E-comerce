@@ -1,28 +1,25 @@
-import { Link, useParams } from "react-router";
 
+import { Link, useParams } from "react-router";
 import {
   ArrowRight,
   Heart,
   ShoppingBag,
   Star,
 } from "lucide-react";
-
 import Header from "../components/layout/Header";
 import Footer from "../components/layout/Footer";
-
-import { products, formatPrice } from "../data/products";
 import useShopStore from "../store/useShopStore";
+import { formatPrice } from "../data/products";
 
 function ProductDetail() {
   const { id } = useParams();
 
-  const product = products.find(
-    (item) => item.id === Number(id)
-  );
-
+  const products = useShopStore((state) => state.products);
   const addToCart = useShopStore((state) => state.addToCart);
   const favorites = useShopStore((state) => state.favorites);
   const toggleFavorite = useShopStore((state) => state.toggleFavorite);
+
+  const product = products.find((item) => item.id === Number(id));
 
   if (!product) {
     return (
@@ -30,9 +27,7 @@ function ProductDetail() {
         dir="rtl"
         className="min-h-screen bg-[#FAF9F6] p-10 text-center"
       >
-        <h1 className="text-2xl font-bold">
-          محصول پیدا نشد!
-        </h1>
+        <h1 className="text-2xl font-bold">محصول پیدا نشد!</h1>
 
         <Link
           to="/products"
@@ -44,6 +39,7 @@ function ProductDetail() {
     );
   }
 
+  const productName = product.name ?? product.title ?? "";
   const isFavorite = favorites.includes(product.id);
 
   return (
@@ -63,7 +59,7 @@ function ProductDetail() {
           <div className="overflow-hidden rounded-2xl bg-[#F4F3EF]">
             <img
               src={product.image}
-              alt={product.name}
+              alt={productName}
               className="aspect-square w-full object-cover"
             />
           </div>
@@ -74,7 +70,7 @@ function ProductDetail() {
             </span>
 
             <h1 className="mt-3 text-2xl font-black leading-relaxed">
-              {product.name}
+              {productName}
             </h1>
 
             <div className="mt-5 flex items-center gap-2">
@@ -91,9 +87,11 @@ function ProductDetail() {
             </div>
 
             <div className="mt-8">
-              <p className="text-sm text-gray-400 line-through">
-                {formatPrice(product.oldPrice)}
-              </p>
+              {product.oldPrice > 0 && (
+                <p className="text-sm text-gray-400 line-through">
+                  {formatPrice(product.oldPrice)}
+                </p>
+              )}
 
               <p className="mt-2 text-2xl font-black text-[#173D35]">
                 {formatPrice(product.price)}
@@ -101,8 +99,8 @@ function ProductDetail() {
             </div>
 
             <p className="mt-6 text-sm leading-8 text-gray-500">
-              این محصول یکی از محصولات منتخب نیک‌مارکت است.
-              برای اضافه‌کردن آن به سبد خرید از دکمه زیر استفاده کن.
+              این محصول یکی از محصولات منتخب نیک‌مارکت است. برای اضافه‌کردن
+              آن به سبد خرید از دکمه زیر استفاده کن.
             </p>
 
             <div className="mt-8 flex flex-wrap gap-3">
