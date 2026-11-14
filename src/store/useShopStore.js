@@ -4,31 +4,79 @@ const useShopStore = create((set) => ({
   cart: [],
   favorites: [],
 
-  addToCart: (product) =>
+  addToCart: (product) => {
     set((state) => {
-      const exists = state.cart.find((item) => item.id === product.id);
+      const productInCart = state.cart.find(
+        (item) => item.id === product.id
+      );
 
-      if (exists) {
+      if (productInCart) {
         return {
-          cart: state.cart.map((item) =>
-            item.id === product.id
-              ? { ...item, quantity: item.quantity + 1 }
-              : item
-          ),
+          cart: state.cart.map((item) => {
+            if (item.id === product.id) {
+              return {
+                ...item,
+                quantity: item.quantity + 1,
+              };
+            }
+
+            return item;
+          }),
         };
       }
 
       return {
         cart: [...state.cart, { ...product, quantity: 1 }],
       };
-    }),
+    });
+  },
 
-  toggleFavorite: (id) =>
+  removeFromCart: (productId) => {
     set((state) => ({
-      favorites: state.favorites.includes(id)
-        ? state.favorites.filter((item) => item !== id)
-        : [...state.favorites, id],
-    })),
+      cart: state.cart.filter((item) => item.id !== productId),
+    }));
+  },
+
+  updateQuantity: (productId, newQuantity) => {
+    if (newQuantity < 1) {
+      return;
+    }
+
+    set((state) => ({
+      cart: state.cart.map((item) => {
+        if (item.id === productId) {
+          return {
+            ...item,
+            quantity: newQuantity,
+          };
+        }
+
+        return item;
+      }),
+    }));
+  },
+
+  clearCart: () => {
+    set({ cart: [] });
+  },
+
+  toggleFavorite: (productId) => {
+    set((state) => {
+      const isFavorite = state.favorites.includes(productId);
+
+      if (isFavorite) {
+        return {
+          favorites: state.favorites.filter(
+            (id) => id !== productId
+          ),
+        };
+      }
+
+      return {
+        favorites: [...state.favorites, productId],
+      };
+    });
+  },
 }));
 
 export default useShopStore;

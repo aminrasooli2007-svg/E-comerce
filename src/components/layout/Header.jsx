@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { Link } from "react-router";
+
 import {
   Search,
   ShoppingBag,
@@ -7,18 +9,18 @@ import {
   Menu,
   X,
 } from "lucide-react";
+
 import useShopStore from "../../store/useShopStore";
 
-function Header({ search, setSearch }) {
+function Header({ search = "", setSearch = () => {} }) {
   const [mobileMenu, setMobileMenu] = useState(false);
 
   const cart = useShopStore((state) => state.cart);
   const favorites = useShopStore((state) => state.favorites);
 
-  const cartCount = cart.reduce(
-    (sum, item) => sum + item.quantity,
-    0
-  );
+  const cartCount = cart.reduce((sum, item) => {
+    return sum + item.quantity;
+  }, 0);
 
   return (
     <>
@@ -36,7 +38,7 @@ function Header({ search, setSearch }) {
             {mobileMenu ? <X size={23} /> : <Menu size={23} />}
           </button>
 
-          <a href="#" className="flex shrink-0 items-center gap-2">
+          <Link to="/" className="flex shrink-0 items-center gap-2">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#173D35] text-white">
               <ShoppingBag size={22} />
             </div>
@@ -44,34 +46,38 @@ function Header({ search, setSearch }) {
             <span className="text-xl font-black tracking-tight">
               نیک<span className="text-[#B89563]">مارکت</span>
             </span>
-          </a>
+          </Link>
 
           <nav className="hidden items-center gap-7 text-sm font-medium md:flex">
-            <a href="#" className="transition hover:text-[#B89563]">
+            <Link to="/" className="transition hover:text-[#B89563]">
               صفحه اصلی
-            </a>
-            <a
-              href="#categories"
-              className="transition hover:text-[#B89563]"
-            >
-              دسته‌بندی‌ها
-            </a>
-            <a
-              href="#products"
+            </Link>
+
+            <Link
+              to="/products"
               className="transition hover:text-[#B89563]"
             >
               فروشگاه
-            </a>
-            <a
-              href="#about"
+            </Link>
+
+            <Link
+              to="/#categories"
+              className="transition hover:text-[#B89563]"
+            >
+              دسته‌بندی‌ها
+            </Link>
+
+            <Link
+              to="/#about"
               className="transition hover:text-[#B89563]"
             >
               درباره ما
-            </a>
+            </Link>
           </nav>
 
           <div className="hidden max-w-md flex-1 items-center rounded-xl border border-[#E8E5DC] bg-white px-3 py-2.5 lg:flex">
             <Search size={19} className="text-[#92958F]" />
+
             <input
               value={search}
               onChange={(event) => setSearch(event.target.value)}
@@ -81,14 +87,10 @@ function Header({ search, setSearch }) {
           </div>
 
           <div className="flex shrink-0 items-center gap-2">
-            <button
+            <Link
+              to="/wishlist"
               className="relative rounded-xl p-2.5 transition hover:bg-[#EFEEE8]"
               aria-label="علاقه‌مندی‌ها"
-              onClick={() =>
-                document
-                  .getElementById("products")
-                  ?.scrollIntoView({ behavior: "smooth" })
-              }
             >
               <Heart size={21} />
 
@@ -97,18 +99,12 @@ function Header({ search, setSearch }) {
                   {favorites.length}
                 </span>
               )}
-            </button>
+            </Link>
 
-            <button
+            <Link
+              to="/cart"
               className="relative rounded-xl p-2.5 transition hover:bg-[#EFEEE8]"
               aria-label="سبد خرید"
-              onClick={() =>
-                alert(
-                  cart.length
-                    ? `تعداد محصولات سبد خرید: ${cartCount}`
-                    : "سبد خرید شما خالی است."
-                )
-              }
             >
               <ShoppingBag size={21} />
 
@@ -117,7 +113,7 @@ function Header({ search, setSearch }) {
                   {cartCount}
                 </span>
               )}
-            </button>
+            </Link>
 
             <button className="hidden items-center gap-2 rounded-xl border border-[#173D35] px-4 py-2.5 text-sm font-semibold transition hover:bg-[#173D35] hover:text-white sm:flex">
               <UserRound size={18} />
@@ -129,6 +125,7 @@ function Header({ search, setSearch }) {
         <div className="px-4 pb-3 lg:hidden">
           <div className="flex items-center rounded-xl border border-[#E8E5DC] bg-white px-3 py-2.5">
             <Search size={19} className="text-[#92958F]" />
+
             <input
               value={search}
               onChange={(event) => setSearch(event.target.value)}
@@ -141,24 +138,44 @@ function Header({ search, setSearch }) {
         {mobileMenu && (
           <nav className="border-t border-[#EAE8E1] bg-white px-5 py-4 md:hidden">
             <div className="flex flex-col gap-4 text-sm">
-              <a href="#" onClick={() => setMobileMenu(false)}>
+              <Link to="/" onClick={() => setMobileMenu(false)}>
                 صفحه اصلی
-              </a>
-              <a
-                href="#categories"
-                onClick={() => setMobileMenu(false)}
-              >
-                دسته‌بندی‌ها
-              </a>
-              <a
-                href="#products"
+              </Link>
+
+              <Link
+                to="/products"
                 onClick={() => setMobileMenu(false)}
               >
                 فروشگاه
-              </a>
-              <a href="#about" onClick={() => setMobileMenu(false)}>
+              </Link>
+
+              <Link
+                to="/#categories"
+                onClick={() => setMobileMenu(false)}
+              >
+                دسته‌بندی‌ها
+              </Link>
+
+              <Link
+                to="/#about"
+                onClick={() => setMobileMenu(false)}
+              >
                 درباره ما
-              </a>
+              </Link>
+
+              <Link
+                to="/cart"
+                onClick={() => setMobileMenu(false)}
+              >
+                سبد خرید
+              </Link>
+
+              <Link
+                to="/wishlist"
+                onClick={() => setMobileMenu(false)}
+              >
+                علاقه‌مندی‌ها
+              </Link>
             </div>
           </nav>
         )}

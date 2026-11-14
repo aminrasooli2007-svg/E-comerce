@@ -63,5 +63,6 @@ export const products = [
   },
 ];
 
-export const formatPrice = (price) =>
-  new Intl.NumberFormat("fa-IR").format(price) + " تومان";
+export const formatPrice = (price) => {
+  return new Intl.NumberFormat("fa-IR").format(price) + " تومان";
+};

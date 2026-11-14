@@ -1,4 +1,5 @@
 import { useState } from "react";
+
 import {
   ArrowLeft,
   ChevronLeft,
@@ -15,6 +16,7 @@ import {
 import Header from "../components/layout/Header";
 import Footer from "../components/layout/Footer";
 import ProductCard from "../components/common/ProductCard";
+
 import { categories, products } from "../data/products";
 
 function Home() {
@@ -61,7 +63,6 @@ function Home() {
       <Header search={search} setSearch={setSearch} />
 
       <main className="mx-auto max-w-7xl px-4 lg:px-8">
-
         {/* Hero */}
         <section className="py-6 sm:py-10">
           <div className="relative flex min-h-[420px] overflow-hidden rounded-[28px] bg-[#173D35] sm:min-h-[490px]">
@@ -107,6 +108,7 @@ function Home() {
             <div className="absolute bottom-7 left-7 hidden rounded-2xl border border-white/20 bg-white/10 p-4 text-white backdrop-blur-md sm:block">
               <div className="flex items-center gap-2">
                 <Star className="fill-[#D8B98C] text-[#D8B98C]" size={17} />
+
                 <span className="text-sm font-bold">
                   کیفیت در اولویت ماست
                 </span>
@@ -135,6 +137,7 @@ function Home() {
 
                 <div>
                   <h3 className="text-sm font-bold">{item.title}</h3>
+
                   <p className="mt-1 text-[10px] text-[#92958F] sm:text-xs">
                     {item.desc}
                   </p>
@@ -151,6 +154,7 @@ function Home() {
               <span className="text-xs font-bold text-[#B89563]">
                 EXPLORE CATEGORIES
               </span>
+
               <h2 className="mt-2 text-2xl font-black">
                 دسته‌بندی محصولات
               </h2>
@@ -174,6 +178,7 @@ function Home() {
                   key={category.title}
                   onClick={() => {
                     setActiveCategory(category.filter);
+
                     document
                       .getElementById("products")
                       ?.scrollIntoView({ behavior: "smooth" });

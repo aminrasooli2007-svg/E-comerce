@@ -1,4 +1,6 @@
+import { Link } from "react-router";
 import { Heart, Star, Plus } from "lucide-react";
+
 import useShopStore from "../../store/useShopStore";
 import { formatPrice } from "../../data/products";
 
@@ -12,11 +14,13 @@ function ProductCard({ product }) {
   return (
     <article className="group overflow-hidden rounded-2xl border border-[#EAE8E1] bg-white transition hover:-translate-y-1 hover:shadow-xl">
       <div className="relative overflow-hidden bg-[#F4F3EF]">
-        <img
-          src={product.image}
-          alt={product.name}
-          className="aspect-square w-full object-cover transition duration-500 group-hover:scale-105"
-        />
+        <Link to={`/products/${product.id}`}>
+          <img
+            src={product.image}
+            alt={product.name}
+            className="aspect-square w-full object-cover transition duration-500 group-hover:scale-105"
+          />
+        </Link>
 
         <span className="absolute right-3 top-3 rounded-lg bg-[#173D35] px-2.5 py-1.5 text-xs font-bold text-white">
           {product.discount}٪ تخفیف
@@ -40,9 +44,11 @@ function ProductCard({ product }) {
           {product.category}
         </span>
 
-        <h3 className="mt-2 min-h-10 text-xs font-bold leading-6 sm:text-sm">
-          {product.name}
-        </h3>
+        <Link to={`/products/${product.id}`}>
+          <h3 className="mt-2 min-h-10 text-xs font-bold leading-6 hover:text-[#B89563] sm:text-sm">
+            {product.name}
+          </h3>
+        </Link>
 
         <div className="mt-3 flex items-center justify-between">
           <div className="flex items-center gap-1">
@@ -50,7 +56,9 @@ function ProductCard({ product }) {
               size={13}
               className="fill-[#D8B98C] text-[#D8B98C]"
             />
-            <span className="text-xs font-semibold">{product.rating}</span>
+            <span className="text-xs font-semibold">
+              {product.rating}
+            </span>
           </div>
 
           <span className="text-[10px] text-[#92958F]">
