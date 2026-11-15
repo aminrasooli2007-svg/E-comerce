@@ -87,6 +87,12 @@ productCount: "Number of Products",
 totalAmount: "Total Amount",
 checkoutComingSoon: "Checkout (Coming Soon)",
 myWishlist: "My Wishlist",
+productNotFound: "Product Not Found!",
+backToShop: "Back to Shop",
+backToProducts: "Back to Products",
+productRating: "Product Rating",
+productDescription: "This product is one of NikMarket's selected items. Use the button below to add it to your shopping cart.",
+
 };
 
 export default translation;

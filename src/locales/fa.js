@@ -87,6 +87,11 @@ productCount: "تعداد محصولات",
 totalAmount: "مبلغ کل",
 checkoutComingSoon: "ادامه فرایند خرید (به‌زودی)",
 myWishlist: "علاقه‌مندی‌های من",
+productNotFound: "محصول پیدا نشد!",
+backToShop: "بازگشت به فروشگاه",
+backToProducts: "بازگشت به محصولات",
+productRating: "امتیاز محصول",
+productDescription: "این محصول یکی از محصولات منتخب نیک‌مارکت است. برای اضافه‌کردن آن به سبد خرید از دکمه زیر استفاده کن.",
 };
 
 export default translation;

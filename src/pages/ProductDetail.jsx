@@ -1,11 +1,15 @@
 
 import { Link, useParams } from "react-router";
+import { useTranslation } from "react-i18next";
+
 import {
   ArrowRight,
+  ArrowLeft,
   Heart,
   ShoppingBag,
   Star,
 } from "lucide-react";
+
 import Header from "../components/layout/Header";
 import Footer from "../components/layout/Footer";
 import useShopStore from "../store/useShopStore";
@@ -13,6 +17,9 @@ import { formatPrice } from "../data/products";
 
 function ProductDetail() {
   const { id } = useParams();
+  const { t, i18n } = useTranslation();
+
+  const isEnglish = i18n.language === "en";
 
   const products = useShopStore((state) => state.products);
   const addToCart = useShopStore((state) => state.addToCart);
@@ -24,16 +31,18 @@ function ProductDetail() {
   if (!product) {
     return (
       <div
-        dir="rtl"
+        dir={isEnglish ? "ltr" : "rtl"}
         className="min-h-screen bg-[#FAF9F6] p-10 text-center"
       >
-        <h1 className="text-2xl font-bold">محصول پیدا نشد!</h1>
+        <h1 className="text-2xl font-bold">
+          {t("productNotFound")}
+        </h1>
 
         <Link
           to="/products"
           className="mt-5 inline-block text-[#173D35] underline"
         >
-          بازگشت به فروشگاه
+          {t("backToShop")}
         </Link>
       </div>
     );
@@ -43,7 +52,10 @@ function ProductDetail() {
   const isFavorite = favorites.includes(product.id);
 
   return (
-    <div dir="rtl" className="min-h-screen bg-[#FAF9F6]">
+    <div
+      dir={isEnglish ? "ltr" : "rtl"}
+      className="min-h-screen bg-[#FAF9F6]"
+    >
       <Header />
 
       <main className="mx-auto max-w-7xl px-4 py-10 lg:px-8">
@@ -51,8 +63,8 @@ function ProductDetail() {
           to="/products"
           className="mb-8 inline-flex items-center gap-2 text-sm text-gray-500"
         >
-          <ArrowRight size={18} />
-          بازگشت به محصولات
+          {isEnglish ? <ArrowLeft size={18} /> : <ArrowRight size={18} />}
+          {t("backToProducts")}
         </Link>
 
         <div className="grid gap-10 rounded-3xl border border-[#EAE8E1] bg-white p-5 md:grid-cols-2 md:p-8">
@@ -82,7 +94,7 @@ function ProductDetail() {
               <span className="font-bold">{product.rating}</span>
 
               <span className="text-sm text-gray-400">
-                امتیاز محصول
+                {t("productRating")}
               </span>
             </div>
 
@@ -99,8 +111,7 @@ function ProductDetail() {
             </div>
 
             <p className="mt-6 text-sm leading-8 text-gray-500">
-              این محصول یکی از محصولات منتخب نیک‌مارکت است. برای اضافه‌کردن
-              آن به سبد خرید از دکمه زیر استفاده کن.
+              {t("productDescription")}
             </p>
 
             <div className="mt-8 flex flex-wrap gap-3">
@@ -109,13 +120,13 @@ function ProductDetail() {
                 className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-[#173D35] px-5 py-4 text-sm font-bold text-white hover:bg-[#245A4E]"
               >
                 <ShoppingBag size={18} />
-                افزودن به سبد خرید
+                {t("addToCart")}
               </button>
 
               <button
                 onClick={() => toggleFavorite(product.id)}
                 className="rounded-xl border border-[#EAE8E1] p-4"
-                aria-label="افزودن به علاقه‌مندی‌ها"
+                aria-label={t("addToWishlist")}
               >
                 <Heart
                   size={20}
