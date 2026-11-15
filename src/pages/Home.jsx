@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import {
   ArrowLeft,
@@ -12,6 +11,7 @@ import {
   Star,
   Search,
 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import Header from "../components/layout/Header";
 import Footer from "../components/layout/Footer";
 import ProductCard from "../components/common/ProductCard";
@@ -19,6 +19,7 @@ import { categories } from "../data/products";
 import useShopStore from "../store/useShopStore";
 
 function Home() {
+  const { t, i18n } = useTranslation();
   const [search, setSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState("همه");
   const products = useShopStore((state) => state.products);
@@ -38,28 +39,33 @@ function Home() {
   const features = [
     {
       icon: Truck,
-      title: "ارسال سریع",
-      desc: "تحویل در کوتاه‌ترین زمان",
+      title: t("fastShipping"),
+      desc: t("fastShippingDesc"),
     },
     {
       icon: ShieldCheck,
-      title: "ضمانت اصالت",
-      desc: "تضمین کیفیت محصولات",
+      title: t("authenticity"),
+      desc: t("authenticityDesc"),
     },
     {
       icon: Headset,
-      title: "پشتیبانی",
-      desc: "همراه شما در تمام مراحل",
+      title: t("support"),
+      desc: t("supportDesc"),
     },
     {
       icon: Clock,
-      title: "خرید آسان",
-      desc: "تجربه خرید بدون دردسر",
+      title: t("easyShopping"),
+      desc: t("easyShoppingDesc"),
     },
   ];
 
+  const productFilters = ["همه", "دیجیتال", "اکسسوری", "پوشاک"];
+
   return (
-    <div dir="rtl" className="min-h-screen bg-[#FAF9F6] text-[#303A33]">
+    <div
+      dir={i18n.dir()}
+      className="min-h-screen bg-[#FAF9F6] text-[#303A33]"
+    >
       <Header search={search} setSearch={setSearch} />
 
       <main className="mx-auto max-w-7xl px-4 lg:px-8">
@@ -68,7 +74,7 @@ function Home() {
             <div className="absolute inset-0">
               <img
                 src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1600"
-                alt="فروشگاه مدرن"
+                alt={t("storeImageAlt")}
                 className="h-full w-full object-cover opacity-35"
               />
               <div className="absolute inset-0 bg-gradient-to-l from-[#173D35] via-[#173D35]/90 to-transparent" />
@@ -78,25 +84,26 @@ function Home() {
               <div className="max-w-xl text-white">
                 <span className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-xs sm:text-sm">
                   <Sparkles size={15} className="text-[#D8B98C]" />
-                  تجربه‌ای متفاوت از خرید آنلاین
+                  {t("heroBadge")}
                 </span>
 
                 <h1 className="mb-6 text-4xl font-black leading-[1.5] sm:text-5xl lg:text-6xl">
-                  انتخابی هوشمندانه،
+                  {t("heroTitle")}
                   <br />
-                  <span className="text-[#D8B98C]">زندگی زیباتر</span>
+                  <span className="text-[#D8B98C]">
+                    {t("heroTitleHighlight")}
+                  </span>
                 </h1>
 
                 <p className="mb-8 max-w-md text-sm leading-8 text-white/75 sm:text-base">
-                  مجموعه‌ای از محصولات باکیفیت و کاربردی، برای کسانی که به
-                  کیفیت و زیبایی اهمیت می‌دهند.
+                  {t("heroDescription")}
                 </p>
 
                 <a
                   href="#products"
                   className="inline-flex items-center gap-3 rounded-xl bg-[#D8B98C] px-6 py-3.5 text-sm font-bold text-[#173D35] transition hover:bg-white"
                 >
-                  مشاهده محصولات
+                  {t("viewProducts")}
                   <ArrowLeft size={18} />
                 </a>
               </div>
@@ -104,13 +111,16 @@ function Home() {
 
             <div className="absolute bottom-7 left-7 hidden rounded-2xl border border-white/20 bg-white/10 p-4 text-white backdrop-blur-md sm:block">
               <div className="flex items-center gap-2">
-                <Star className="fill-[#D8B98C] text-[#D8B98C]" size={17} />
+                <Star
+                  className="fill-[#D8B98C] text-[#D8B98C]"
+                  size={17}
+                />
                 <span className="text-sm font-bold">
-                  کیفیت در اولویت ماست
+                  {t("qualityFirst")}
                 </span>
               </div>
               <p className="mt-1 text-xs text-white/70">
-                تجربه خریدی مطمئن و آسان
+                {t("easyAndSecureShopping")}
               </p>
             </div>
           </div>
@@ -143,10 +153,10 @@ function Home() {
           <div className="mb-7 flex items-end justify-between">
             <div>
               <span className="text-xs font-bold text-[#B89563]">
-                EXPLORE CATEGORIES
+                {t("exploreCategories")}
               </span>
               <h2 className="mt-2 text-2xl font-black">
-                دسته‌بندی محصولات
+                {t("productCategories")}
               </h2>
             </div>
 
@@ -154,7 +164,7 @@ function Home() {
               href="#products"
               className="flex items-center gap-2 text-xs font-bold text-[#173D35]"
             >
-              همه محصولات
+              {t("allProducts")}
               <ChevronLeft size={17} />
             </a>
           </div>
@@ -178,7 +188,9 @@ function Home() {
                     <Icon size={28} strokeWidth={1.7} />
                   </div>
                   <span className="text-center text-xs font-bold">
-                    {category.title}
+                    {t(category.filter, {
+                      defaultValue: category.title,
+                    })}
                   </span>
                 </button>
               );
@@ -190,23 +202,25 @@ function Home() {
           <div className="mb-7 flex flex-wrap items-end justify-between gap-4">
             <div>
               <span className="text-xs font-bold text-[#B89563]">
-                HANDPICKED FOR YOU
+                {t("handpickedForYou")}
               </span>
-              <h2 className="mt-2 text-2xl font-black">محصولات منتخب</h2>
+              <h2 className="mt-2 text-2xl font-black">
+                {t("selectedProducts")}
+              </h2>
               <p className="mt-2 text-sm text-[#92958F]">
-                انتخاب‌هایی خاص برای سلیقه‌های خاص
+                {t("selectedProductsDescription")}
               </p>
             </div>
 
             <div className="flex items-center gap-2 rounded-xl border border-[#EAE8E1] bg-white px-3 py-2 text-xs">
-              <span>مرتب‌سازی:</span>
-              <span className="font-bold">پرفروش‌ترین</span>
+              <span>{t("sortBy")}</span>
+              <span className="font-bold">{t("bestSelling")}</span>
               <ChevronDown size={15} />
             </div>
           </div>
 
           <div className="mb-6 flex flex-wrap gap-2">
-            {["همه", "دیجیتال", "اکسسوری", "پوشاک"].map((category) => (
+            {productFilters.map((category) => (
               <button
                 key={category}
                 onClick={() => setActiveCategory(category)}
@@ -216,7 +230,7 @@ function Home() {
                     : "border border-[#EAE8E1] bg-white hover:border-[#173D35]"
                 }`}
               >
-                {category}
+                {t(category)}
               </button>
             ))}
           </div>
@@ -230,9 +244,9 @@ function Home() {
           {filteredProducts.length === 0 && (
             <div className="rounded-2xl border border-dashed border-[#D8D5CC] py-16 text-center">
               <Search size={32} className="mx-auto mb-4 text-[#92958F]" />
-              <p className="font-bold">محصولی پیدا نشد</p>
+              <p className="font-bold">{t("noProductsFound")}</p>
               <p className="mt-2 text-sm text-[#92958F]">
-                عبارت جستجو یا دسته‌بندی را تغییر بده.
+                {t("changeSearchOrCategory")}
               </p>
             </div>
           )}
@@ -242,20 +256,19 @@ function Home() {
           <div className="relative overflow-hidden rounded-[28px] bg-[#E9E5D9] px-7 py-12 sm:px-14">
             <div className="relative z-10 max-w-lg">
               <span className="text-xs font-bold text-[#A17D4C]">
-                SPECIAL COLLECTION
+                {t("specialCollection")}
               </span>
               <h2 className="mt-4 text-3xl font-black leading-relaxed sm:text-4xl">
-                زیبایی در سادگی است
+                {t("beautyInSimplicity")}
               </h2>
               <p className="mt-3 text-sm leading-8 text-[#666C64]">
-                مجموعه‌ای از انتخاب‌های خاص که سبک زندگی شما را زیباتر
-                می‌کنند.
+                {t("specialCollectionDescription")}
               </p>
               <a
                 href="#products"
                 className="mt-6 inline-flex items-center gap-2 rounded-xl bg-[#173D35] px-6 py-3 text-sm font-bold text-white transition hover:bg-[#245A4E]"
               >
-                دیدن محصولات
+                {t("seeProducts")}
                 <ArrowLeft size={17} />
               </a>
             </div>
