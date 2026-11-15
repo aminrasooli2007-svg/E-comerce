@@ -76,6 +76,16 @@ contactUs: "Contact Us",
 contactDescription: "For guidance and answers to your questions, you can contact our support team.",
 customerSupport: "Customer Support",
 copyright: "© All rights reserved to NikMarket.",
+myCart: "My Shopping Cart",
+viewProducts: "View Products",
+decreaseQuantity: "Decrease quantity",
+increaseQuantity: "Increase quantity",
+removeProduct: "Remove product",
+clearCart: "Clear Cart",
+orderSummary: "Order Summary",
+productCount: "Number of Products",
+totalAmount: "Total Amount",
+checkoutComingSoon: "Checkout (Coming Soon)",
 };
 
 export default translation;

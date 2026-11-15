@@ -76,6 +76,16 @@ contactUs: "ارتباط با ما",
 contactDescription: "برای دریافت راهنمایی و پاسخ به سوالات خود می‌توانید با تیم پشتیبانی ما در ارتباط باشید.",
 customerSupport: "پشتیبانی مشتریان",
 copyright: "© تمامی حقوق برای نیک‌مارکت محفوظ است.",
+myCart: "سبد خرید من",
+viewProducts: "مشاهده محصولات",
+decreaseQuantity: "کم کردن تعداد",
+increaseQuantity: "زیاد کردن تعداد",
+removeProduct: "حذف محصول",
+clearCart: "خالی کردن سبد خرید",
+orderSummary: "خلاصه سفارش",
+productCount: "تعداد محصولات",
+totalAmount: "مبلغ کل",
+checkoutComingSoon: "ادامه فرایند خرید (به‌زودی)",
 };
 
 export default translation;
