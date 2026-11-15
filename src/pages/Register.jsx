@@ -1,11 +1,15 @@
 
 import { useState } from "react";
 import { Link } from "react-router";
+import { useTranslation } from "react-i18next";
 import { UserPlus, User, Mail, Lock } from "lucide-react";
 import Header from "../components/layout/Header";
 import Footer from "../components/layout/Footer";
 
 function Register() {
+  const { t, i18n } = useTranslation();
+  const isEnglish = i18n.language === "en";
+
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -16,20 +20,23 @@ function Register() {
     event.preventDefault();
 
     if (password.length < 8) {
-      setMessage("رمز عبور باید حداقل ۸ کاراکتر داشته باشد.");
+      setMessage(t("passwordTooShort"));
       return;
     }
 
     if (password !== confirmPassword) {
-      setMessage("رمز عبور و تکرار آن یکسان نیستند.");
+      setMessage(t("passwordMismatch"));
       return;
     }
 
-    setMessage("فرم ثبت‌نام آماده است. اتصال به سرور در مرحله بعد انجام می‌شود.");
+    setMessage(t("registerSuccessMessage"));
   }
 
   return (
-    <div dir="rtl" className="min-h-screen bg-[#FAF9F6]">
+    <div
+      dir={isEnglish ? "ltr" : "rtl"}
+      className="min-h-screen bg-[#FAF9F6]"
+    >
       <Header search="" setSearch={() => {}} />
 
       <main className="flex min-h-[700px] items-center justify-center px-4 py-16">
@@ -40,28 +47,28 @@ function Register() {
             </div>
 
             <h1 className="text-2xl font-black text-[#173D35]">
-              ساخت حساب کاربری
+              {t("createAccount")}
             </h1>
 
             <p className="mt-2 text-sm text-gray-500">
-              به خانواده نیک‌مارکت بپیوندید.
+              {t("joinNikMarket")}
             </p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="mb-2 block text-sm font-semibold text-gray-700">
-                نام و نام خانوادگی
+                {t("fullName")}
               </label>
 
               <div className="flex items-center gap-3 rounded-xl border border-gray-200 px-4 focus-within:border-[#173D35]">
-                <User size={19} className="text-gray-400" />
+                <User size={19} className="shrink-0 text-gray-400" />
 
                 <input
                   type="text"
                   value={name}
                   onChange={(event) => setName(event.target.value)}
-                  placeholder="نام خود را وارد کنید"
+                  placeholder={t("enterYourName")}
                   required
                   className="w-full bg-transparent py-3 text-sm outline-none"
                 />
@@ -70,11 +77,11 @@ function Register() {
 
             <div>
               <label className="mb-2 block text-sm font-semibold text-gray-700">
-                ایمیل
+                {t("email")}
               </label>
 
               <div className="flex items-center gap-3 rounded-xl border border-gray-200 px-4 focus-within:border-[#173D35]">
-                <Mail size={19} className="text-gray-400" />
+                <Mail size={19} className="shrink-0 text-gray-400" />
 
                 <input
                   type="email"
@@ -89,17 +96,17 @@ function Register() {
 
             <div>
               <label className="mb-2 block text-sm font-semibold text-gray-700">
-                رمز عبور
+                {t("password")}
               </label>
 
               <div className="flex items-center gap-3 rounded-xl border border-gray-200 px-4 focus-within:border-[#173D35]">
-                <Lock size={19} className="text-gray-400" />
+                <Lock size={19} className="shrink-0 text-gray-400" />
 
                 <input
                   type="password"
                   value={password}
                   onChange={(event) => setPassword(event.target.value)}
-                  placeholder="حداقل ۸ کاراکتر"
+                  placeholder={t("minimumPasswordLength")}
                   required
                   className="w-full bg-transparent py-3 text-sm outline-none"
                 />
@@ -108,17 +115,17 @@ function Register() {
 
             <div>
               <label className="mb-2 block text-sm font-semibold text-gray-700">
-                تکرار رمز عبور
+                {t("confirmPassword")}
               </label>
 
               <div className="flex items-center gap-3 rounded-xl border border-gray-200 px-4 focus-within:border-[#173D35]">
-                <Lock size={19} className="text-gray-400" />
+                <Lock size={19} className="shrink-0 text-gray-400" />
 
                 <input
                   type="password"
                   value={confirmPassword}
                   onChange={(event) => setConfirmPassword(event.target.value)}
-                  placeholder="رمز عبور را دوباره وارد کنید"
+                  placeholder={t("repeatPassword")}
                   required
                   className="w-full bg-transparent py-3 text-sm outline-none"
                 />
@@ -129,7 +136,7 @@ function Register() {
               type="submit"
               className="w-full rounded-xl bg-[#173D35] py-3.5 font-bold text-white transition hover:bg-[#245448]"
             >
-              ایجاد حساب کاربری
+              {t("createAccount")}
             </button>
           </form>
 
@@ -140,12 +147,12 @@ function Register() {
           )}
 
           <p className="mt-7 text-center text-sm text-gray-500">
-            قبلاً ثبت‌نام کرده‌اید؟
+            {t("alreadyRegistered")}
             <Link
               to="/login"
-              className="mr-2 font-bold text-[#173D35] hover:underline"
+              className="mx-2 font-bold text-[#173D35] hover:underline"
             >
-              وارد شوید
+              {t("loginNow")}
             </Link>
           </p>
         </div>

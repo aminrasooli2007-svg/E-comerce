@@ -1,22 +1,29 @@
 
 import { useState } from "react";
 import { Link } from "react-router";
+import { useTranslation } from "react-i18next";
 import { LogIn, Mail, Lock } from "lucide-react";
 import Header from "../components/layout/Header";
 import Footer from "../components/layout/Footer";
 
 function Login() {
+  const { t, i18n } = useTranslation();
+  const isEnglish = i18n.language === "en";
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
 
   function handleSubmit(event) {
     event.preventDefault();
-    setMessage("فرم ورود آماده است. اتصال به سرور در مرحله بعد انجام می‌شود.");
+    setMessage(t("loginSuccessMessage"));
   }
 
   return (
-    <div dir="rtl" className="min-h-screen bg-[#FAF9F6]">
+    <div
+      dir={isEnglish ? "ltr" : "rtl"}
+      className="min-h-screen bg-[#FAF9F6]"
+    >
       <Header search="" setSearch={() => {}} />
 
       <main className="flex min-h-[650px] items-center justify-center px-4 py-16">
@@ -27,22 +34,22 @@ function Login() {
             </div>
 
             <h1 className="text-2xl font-black text-[#173D35]">
-              خوش آمدید!
+              {t("welcomeBack")}
             </h1>
 
             <p className="mt-2 text-sm text-gray-500">
-              برای ورود به حساب کاربری خود اطلاعاتتان را وارد کنید.
+              {t("loginDescription")}
             </p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
               <label className="mb-2 block text-sm font-semibold text-gray-700">
-                ایمیل
+                {t("email")}
               </label>
 
               <div className="flex items-center gap-3 rounded-xl border border-gray-200 px-4 transition focus-within:border-[#173D35]">
-                <Mail size={19} className="text-gray-400" />
+                <Mail size={19} className="shrink-0 text-gray-400" />
 
                 <input
                   type="email"
@@ -57,17 +64,17 @@ function Login() {
 
             <div>
               <label className="mb-2 block text-sm font-semibold text-gray-700">
-                رمز عبور
+                {t("password")}
               </label>
 
               <div className="flex items-center gap-3 rounded-xl border border-gray-200 px-4 transition focus-within:border-[#173D35]">
-                <Lock size={19} className="text-gray-400" />
+                <Lock size={19} className="shrink-0 text-gray-400" />
 
                 <input
                   type="password"
                   value={password}
                   onChange={(event) => setPassword(event.target.value)}
-                  placeholder="رمز عبور خود را وارد کنید"
+                  placeholder={t("enterPassword")}
                   required
                   className="w-full bg-transparent py-3 text-sm outline-none"
                 />
@@ -78,7 +85,7 @@ function Login() {
               type="submit"
               className="w-full rounded-xl bg-[#173D35] py-3.5 font-bold text-white transition hover:bg-[#245448]"
             >
-              ورود به حساب
+              {t("loginToAccount")}
             </button>
           </form>
 
@@ -89,12 +96,12 @@ function Login() {
           )}
 
           <p className="mt-7 text-center text-sm text-gray-500">
-            هنوز حساب کاربری ندارید؟
+            {t("noAccount")}
             <Link
               to="/register"
-              className="mr-2 font-bold text-[#173D35] hover:underline"
+              className="mx-2 font-bold text-[#173D35] hover:underline"
             >
-              ثبت‌نام کنید
+              {t("registerNow")}
             </Link>
           </p>
         </div>
