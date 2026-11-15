@@ -86,6 +86,7 @@ orderSummary: "خلاصه سفارش",
 productCount: "تعداد محصولات",
 totalAmount: "مبلغ کل",
 checkoutComingSoon: "ادامه فرایند خرید (به‌زودی)",
+myWishlist: "علاقه‌مندی‌های من",
 };
 
 export default translation;

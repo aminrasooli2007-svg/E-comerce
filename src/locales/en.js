@@ -86,6 +86,7 @@ orderSummary: "Order Summary",
 productCount: "Number of Products",
 totalAmount: "Total Amount",
 checkoutComingSoon: "Checkout (Coming Soon)",
+myWishlist: "My Wishlist",
 };
 
 export default translation;

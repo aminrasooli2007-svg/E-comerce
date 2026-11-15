@@ -1,5 +1,7 @@
+
 import { Link } from "react-router";
 import { Heart } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 import Header from "../components/layout/Header";
 import Footer from "../components/layout/Footer";
@@ -9,6 +11,9 @@ import useShopStore from "../store/useShopStore";
 import { products } from "../data/products";
 
 function Wishlist() {
+  const { t, i18n } = useTranslation();
+  const isEnglish = i18n.language === "en";
+
   const favorites = useShopStore((state) => state.favorites);
 
   const favoriteProducts = products.filter((product) =>
@@ -16,12 +21,15 @@ function Wishlist() {
   );
 
   return (
-    <div dir="rtl" className="min-h-screen bg-[#FAF9F6]">
+    <div
+      dir={isEnglish ? "ltr" : "rtl"}
+      className="min-h-screen bg-[#FAF9F6]"
+    >
       <Header />
 
       <main className="mx-auto max-w-7xl px-4 py-10 lg:px-8">
         <h1 className="text-2xl font-black">
-          علاقه‌مندی‌های من
+          {t("myWishlist")}
         </h1>
 
         {favoriteProducts.length === 0 ? (
@@ -32,14 +40,14 @@ function Wishlist() {
             />
 
             <h2 className="text-lg font-bold">
-              هنوز محصولی به علاقه‌مندی‌ها اضافه نکرده‌ای.
+              {t("emptyWishlist")}
             </h2>
 
             <Link
               to="/products"
               className="mt-6 inline-block rounded-xl bg-[#173D35] px-6 py-3 text-sm font-bold text-white"
             >
-              مشاهده محصولات
+              {t("viewProducts")}
             </Link>
           </div>
         ) : (
