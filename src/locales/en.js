@@ -1,9 +1,9 @@
 
 const translation = {
   direction: "ltr",
-  language: "Language",
+  language: "Change Language",
   home: "Home",
-  products: "Products",
+  products: "Shop",
   wishlist: "Wishlist",
   cart: "Shopping Cart",
   login: "Login",
@@ -20,6 +20,10 @@ const translation = {
   emptyWishlist: "Your wishlist is empty",
   admin: "Product Management",
   welcome: "Welcome to Nik Market",
+  categories: "Categories",
+  about: "About Us",
+  shipping: "Free shipping on orders over 3 million Tomans",
+  menu: "Open Menu",
 };
 
 export default translation;

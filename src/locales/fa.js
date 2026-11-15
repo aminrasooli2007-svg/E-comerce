@@ -1,9 +1,9 @@
 
 const translation = {
   direction: "rtl",
-  language: "زبان",
-  home: "خانه",
-  products: "محصولات",
+  language: "تغییر زبان",
+  home: "صفحه اصلی",
+  products: "فروشگاه",
   wishlist: "علاقه‌مندی‌ها",
   cart: "سبد خرید",
   login: "ورود",
@@ -20,6 +20,10 @@ const translation = {
   emptyWishlist: "لیست علاقه‌مندی‌های شما خالی است",
   admin: "مدیریت محصولات",
   welcome: "به نیک‌مارکت خوش آمدید",
+  categories: "دسته‌بندی‌ها",
+  about: "درباره ما",
+  shipping: "ارسال رایگان برای خریدهای بالای ۳ میلیون تومان",
+  menu: "باز کردن منو",
 };
 
 export default translation;
