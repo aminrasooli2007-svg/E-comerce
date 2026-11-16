@@ -1,6 +1,7 @@
 
 import { useState } from "react";
 import { Link } from "react-router";
+import { useTranslation } from "react-i18next";
 import {
   Package,
   Plus,
@@ -10,6 +11,7 @@ import {
   X,
   Save,
   ArrowRight,
+  ArrowLeft,
 } from "lucide-react";
 import useShopStore from "../store/useShopStore";
 
@@ -24,6 +26,10 @@ const emptyProduct = {
 };
 
 function AdminProducts() {
+  const { t, i18n } = useTranslation();
+  const isEnglish = i18n.language === "en";
+  const dir = isEnglish ? "ltr" : "rtl";
+
   const products = useShopStore((state) => state.products);
   const addProduct = useShopStore((state) => state.addProduct);
   const updateProduct = useShopStore((state) => state.updateProduct);
@@ -35,6 +41,14 @@ function AdminProducts() {
   const [message, setMessage] = useState("");
   const [showForm, setShowForm] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
+
+  const categories = [
+    { value: "دیجیتال", label: t("adminCategoryDigital") },
+    { value: "پوشاک", label: t("adminCategoryClothing") },
+    { value: "اکسسوری", label: t("adminCategoryAccessories") },
+    { value: "خانه", label: t("adminCategoryHome") },
+    { value: "زیبایی", label: t("adminCategoryBeauty") },
+  ];
 
   function handleChange(event) {
     const { name, value } = event.target;
@@ -88,16 +102,16 @@ function AdminProducts() {
       !Number.isFinite(productData.price) ||
       productData.price <= 0
     ) {
-      setMessage("لطفاً اطلاعات محصول را به‌درستی وارد کنید.");
+      setMessage(t("adminInvalidProduct"));
       return;
     }
 
     if (editingId !== null) {
       updateProduct(editingId, productData);
-      setMessage("محصول با موفقیت ویرایش شد.");
+      setMessage(t("adminProductUpdated"));
     } else {
       addProduct(productData);
-      setMessage("محصول جدید با موفقیت اضافه شد.");
+      setMessage(t("adminProductAdded"));
     }
 
     setShowForm(false);
@@ -108,7 +122,7 @@ function AdminProducts() {
   function handleDelete(productId) {
     deleteProduct(productId);
     setDeleteId(null);
-    setMessage("محصول با موفقیت حذف شد.");
+    setMessage(t("adminProductDeleted"));
   }
 
   const filteredProducts = products.filter((product) =>
@@ -117,20 +131,31 @@ function AdminProducts() {
       .includes(search.trim().toLowerCase())
   );
 
+  function getCategoryLabel(category) {
+    return categories.find((item) => item.value === category)?.label ?? category;
+  }
+
+  function formatPrice(price) {
+    return `${Number(price).toLocaleString(isEnglish ? "en-US" : "fa-IR")} ${t("adminToman")}`;
+  }
+
+  const inputClass =
+    "w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm outline-none focus:border-[#173D35]";
+
   return (
-    <div dir="rtl" className="min-h-screen bg-[#FAF9F6]">
+    <div dir={dir} className="min-h-screen bg-[#FAF9F6]">
       <header className="border-b border-gray-100 bg-white">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-5 sm:px-6">
           <Link to="/" className="text-xl font-black text-[#173D35]">
-            نیک‌مارکت
+            {isEnglish ? "NikMarket" : "نیک‌مارکت"}
           </Link>
 
           <Link
             to="/"
             className="flex items-center gap-2 text-sm text-gray-500 transition hover:text-[#173D35]"
           >
-            <ArrowRight size={17} />
-            بازگشت به فروشگاه
+            {isEnglish ? <ArrowLeft size={17} /> : <ArrowRight size={17} />}
+            {t("adminBackToShop")}
           </Link>
         </div>
       </header>
@@ -141,12 +166,12 @@ function AdminProducts() {
             <div className="mb-2 flex items-center gap-3">
               <Package size={27} className="text-[#173D35]" />
               <h1 className="text-2xl font-black text-[#173D35]">
-                مدیریت محصولات
+                {t("adminTitle")}
               </h1>
             </div>
 
             <p className="text-sm text-gray-500">
-              محصولات فروشگاه خود را مدیریت کنید.
+              {t("adminDescription")}
             </p>
           </div>
 
@@ -155,27 +180,33 @@ function AdminProducts() {
             className="flex items-center justify-center gap-2 rounded-xl bg-[#173D35] px-5 py-3 font-bold text-white transition hover:bg-[#245448]"
           >
             <Plus size={19} />
-            افزودن محصول
+            {t("adminAddProduct")}
           </button>
         </div>
 
         <div className="mb-6 grid gap-4 sm:grid-cols-3">
           <div className="rounded-2xl border border-gray-100 bg-white p-5">
-            <p className="text-sm text-gray-500">کل محصولات</p>
+            <p className="text-sm text-gray-500">
+              {t("adminTotalProducts")}
+            </p>
             <p className="mt-2 text-2xl font-black text-[#173D35]">
               {products.length}
             </p>
           </div>
 
           <div className="rounded-2xl border border-gray-100 bg-white p-5">
-            <p className="text-sm text-gray-500">محصولات نمایش داده‌شده</p>
+            <p className="text-sm text-gray-500">
+              {t("adminDisplayedProducts")}
+            </p>
             <p className="mt-2 text-2xl font-black text-[#173D35]">
               {filteredProducts.length}
             </p>
           </div>
 
           <div className="rounded-2xl border border-gray-100 bg-white p-5">
-            <p className="text-sm text-gray-500">دسته‌بندی‌ها</p>
+            <p className="text-sm text-gray-500">
+              {t("adminCategories")}
+            </p>
             <p className="mt-2 text-2xl font-black text-[#173D35]">
               {new Set(products.map((product) => product.category)).size}
             </p>
@@ -185,7 +216,10 @@ function AdminProducts() {
         {message && (
           <div className="mb-5 flex items-center justify-between rounded-xl bg-green-50 p-4 text-sm font-semibold text-green-800">
             {message}
-            <button onClick={() => setMessage("")}>
+            <button
+              onClick={() => setMessage("")}
+              aria-label={t("adminCloseMessage")}
+            >
               <X size={18} />
             </button>
           </div>
@@ -195,54 +229,60 @@ function AdminProducts() {
           <section className="mb-8 rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
             <div className="mb-6 flex items-center justify-between">
               <h2 className="text-lg font-black text-[#173D35]">
-                {editingId !== null ? "ویرایش محصول" : "افزودن محصول جدید"}
+                {editingId !== null
+                  ? t("adminEditProduct")
+                  : t("adminNewProduct")}
               </h2>
 
               <button
                 type="button"
                 onClick={() => setShowForm(false)}
+                aria-label={t("adminCloseForm")}
                 className="rounded-lg p-2 text-gray-500 hover:bg-gray-100"
               >
                 <X size={20} />
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="grid gap-5 sm:grid-cols-2">
+            <form
+              onSubmit={handleSubmit}
+              className="grid gap-5 sm:grid-cols-2"
+            >
               <div className="sm:col-span-2">
                 <label className="mb-2 block text-sm font-semibold text-gray-700">
-                  نام محصول
+                  {t("adminProductName")}
                 </label>
                 <input
                   name="title"
                   value={form.title}
                   onChange={handleChange}
                   required
-                  placeholder="نام محصول را وارد کنید"
-                  className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm outline-none focus:border-[#173D35]"
+                  placeholder={t("adminEnterProductName")}
+                  className={inputClass}
                 />
               </div>
 
               <div>
                 <label className="mb-2 block text-sm font-semibold text-gray-700">
-                  دسته‌بندی
+                  {t("adminCategory")}
                 </label>
                 <select
                   name="category"
                   value={form.category}
                   onChange={handleChange}
-                  className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm outline-none focus:border-[#173D35]"
+                  className={inputClass}
                 >
-                  <option value="دیجیتال">دیجیتال</option>
-                  <option value="پوشاک">پوشاک</option>
-                  <option value="اکسسوری">اکسسوری</option>
-                  <option value="خانه">خانه و آشپزخانه</option>
-                  <option value="زیبایی">زیبایی و سلامت</option>
+                  {categories.map((category) => (
+                    <option key={category.value} value={category.value}>
+                      {category.label}
+                    </option>
+                  ))}
                 </select>
               </div>
 
               <div>
                 <label className="mb-2 block text-sm font-semibold text-gray-700">
-                  قیمت (تومان)
+                  {t("adminPrice")} ({t("adminToman")})
                 </label>
                 <input
                   type="number"
@@ -251,13 +291,13 @@ function AdminProducts() {
                   onChange={handleChange}
                   required
                   min="1"
-                  className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm outline-none focus:border-[#173D35]"
+                  className={inputClass}
                 />
               </div>
 
               <div>
                 <label className="mb-2 block text-sm font-semibold text-gray-700">
-                  قیمت قبلی (تومان)
+                  {t("adminOldPrice")} ({t("adminToman")})
                 </label>
                 <input
                   type="number"
@@ -265,13 +305,13 @@ function AdminProducts() {
                   value={form.oldPrice}
                   onChange={handleChange}
                   min="0"
-                  className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm outline-none focus:border-[#173D35]"
+                  className={inputClass}
                 />
               </div>
 
               <div>
                 <label className="mb-2 block text-sm font-semibold text-gray-700">
-                  درصد تخفیف
+                  {t("adminDiscount")}
                 </label>
                 <input
                   type="number"
@@ -280,13 +320,13 @@ function AdminProducts() {
                   onChange={handleChange}
                   min="0"
                   max="100"
-                  className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm outline-none focus:border-[#173D35]"
+                  className={inputClass}
                 />
               </div>
 
               <div>
                 <label className="mb-2 block text-sm font-semibold text-gray-700">
-                  امتیاز محصول
+                  {t("adminRating")}
                 </label>
                 <input
                   type="number"
@@ -296,13 +336,13 @@ function AdminProducts() {
                   min="0"
                   max="5"
                   step="0.1"
-                  className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm outline-none focus:border-[#173D35]"
+                  className={inputClass}
                 />
               </div>
 
               <div className="sm:col-span-2">
                 <label className="mb-2 block text-sm font-semibold text-gray-700">
-                  آدرس تصویر محصول
+                  {t("adminImageUrl")}
                 </label>
                 <input
                   type="url"
@@ -311,18 +351,18 @@ function AdminProducts() {
                   onChange={handleChange}
                   required
                   placeholder="https://example.com/image.jpg"
-                  className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm outline-none focus:border-[#173D35]"
+                  className={inputClass}
                 />
               </div>
 
               {form.image && (
                 <div className="sm:col-span-2">
                   <p className="mb-2 text-sm font-semibold text-gray-700">
-                    پیش‌نمایش تصویر
+                    {t("adminImagePreview")}
                   </p>
                   <img
                     src={form.image}
-                    alt="پیش‌نمایش محصول"
+                    alt={t("adminProductPreview")}
                     className="h-40 w-40 rounded-xl border border-gray-100 object-cover"
                   />
                 </div>
@@ -334,7 +374,7 @@ function AdminProducts() {
                   className="flex items-center gap-2 rounded-xl bg-[#173D35] px-6 py-3 font-bold text-white transition hover:bg-[#245448]"
                 >
                   <Save size={18} />
-                  ذخیره محصول
+                  {t("adminSaveProduct")}
                 </button>
 
                 <button
@@ -342,7 +382,7 @@ function AdminProducts() {
                   onClick={() => setShowForm(false)}
                   className="rounded-xl border border-gray-200 px-6 py-3 font-semibold text-gray-600 hover:bg-gray-50"
                 >
-                  انصراف
+                  {t("adminCancel")}
                 </button>
               </div>
             </form>
@@ -354,31 +394,39 @@ function AdminProducts() {
             <div className="relative">
               <Search
                 size={19}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400"
+                className={`absolute top-1/2 -translate-y-1/2 text-gray-400 ${
+                  isEnglish ? "left-4" : "right-4"
+                }`}
               />
               <input
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
-                placeholder="جستجوی نام محصول..."
-                className="w-full rounded-xl border border-gray-200 py-3 pr-11 pl-4 text-sm outline-none focus:border-[#173D35]"
+                placeholder={t("adminSearchPlaceholder")}
+                className={`w-full rounded-xl border border-gray-200 py-3 text-sm outline-none focus:border-[#173D35] ${
+                  isEnglish ? "pl-11 pr-4" : "pr-11 pl-4"
+                }`}
               />
             </div>
           </div>
 
           {filteredProducts.length === 0 ? (
             <div className="p-12 text-center text-gray-500">
-              محصولی پیدا نشد.
+              {t("adminNoProducts")}
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full min-w-[700px] text-right">
+              <table
+                className={`w-full min-w-[700px] ${
+                  isEnglish ? "text-left" : "text-right"
+                }`}
+              >
                 <thead className="bg-[#F5F3EE] text-sm text-gray-600">
                   <tr>
-                    <th className="px-5 py-4">محصول</th>
-                    <th className="px-5 py-4">دسته‌بندی</th>
-                    <th className="px-5 py-4">قیمت</th>
-                    <th className="px-5 py-4">امتیاز</th>
-                    <th className="px-5 py-4">عملیات</th>
+                    <th className="px-5 py-4">{t("adminProduct")}</th>
+                    <th className="px-5 py-4">{t("adminCategory")}</th>
+                    <th className="px-5 py-4">{t("adminPriceColumn")}</th>
+                    <th className="px-5 py-4">{t("adminRating")}</th>
+                    <th className="px-5 py-4">{t("adminActions")}</th>
                   </tr>
                 </thead>
 
@@ -390,22 +438,22 @@ function AdminProducts() {
                           {product.image && (
                             <img
                               src={product.image}
-                              alt={product.name}
+                              alt={product.name || product.title || ""}
                               className="h-12 w-12 rounded-lg object-cover"
                             />
                           )}
                           <span className="font-semibold text-gray-700">
-                            {product.name || "بدون نام"}
+                            {product.name || product.title || t("adminUnnamed")}
                           </span>
                         </div>
                       </td>
 
                       <td className="px-5 py-4 text-sm text-gray-500">
-                        {product.category}
+                        {getCategoryLabel(product.category)}
                       </td>
 
                       <td className="px-5 py-4 text-sm font-semibold text-[#173D35]">
-                        {Number(product.price).toLocaleString("fa-IR")} تومان
+                        {formatPrice(product.price)}
                       </td>
 
                       <td className="px-5 py-4 text-sm text-gray-500">
@@ -416,7 +464,7 @@ function AdminProducts() {
                         <div className="flex items-center gap-2">
                           <button
                             onClick={() => openEditForm(product)}
-                            aria-label="ویرایش محصول"
+                            aria-label={t("adminEditProduct")}
                             className="rounded-lg bg-blue-50 p-2 text-blue-600 hover:bg-blue-100"
                           >
                             <Pencil size={17} />
@@ -424,7 +472,7 @@ function AdminProducts() {
 
                           <button
                             onClick={() => setDeleteId(product.id)}
-                            aria-label="حذف محصول"
+                            aria-label={t("adminDeleteProduct")}
                             className="rounded-lg bg-red-50 p-2 text-red-600 hover:bg-red-100"
                           >
                             <Trash2 size={17} />
@@ -444,11 +492,11 @@ function AdminProducts() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
           <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl">
             <h2 className="text-lg font-black text-[#173D35]">
-              حذف محصول
+              {t("adminDeleteTitle")}
             </h2>
 
             <p className="mt-3 text-sm leading-7 text-gray-500">
-              آیا مطمئن هستی که می‌خواهی این محصول را حذف کنی؟
+              {t("adminDeleteConfirmation")}
             </p>
 
             <div className="mt-6 flex gap-3">
@@ -456,14 +504,14 @@ function AdminProducts() {
                 onClick={() => handleDelete(deleteId)}
                 className="flex-1 rounded-xl bg-red-600 py-3 font-bold text-white hover:bg-red-700"
               >
-                بله، حذف شود
+                {t("adminConfirmDelete")}
               </button>
 
               <button
                 onClick={() => setDeleteId(null)}
                 className="flex-1 rounded-xl border border-gray-200 py-3 font-semibold text-gray-600 hover:bg-gray-50"
               >
-                انصراف
+                {t("adminCancel")}
               </button>
             </div>
           </div>
@@ -471,7 +519,7 @@ function AdminProducts() {
       )}
 
       <footer className="mt-12 border-t border-gray-100 bg-white py-5 text-center text-xs text-gray-400">
-        پنل مدیریت نیک‌مارکت
+        {t("adminFooter")}
       </footer>
     </div>
   );
