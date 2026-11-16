@@ -44,6 +44,11 @@ const useShopStore = create(
       products: getInitialProducts(),
       cart: [],
       favorites: [],
+      user: null,
+
+      login: (user) => set({ user }),
+
+      logout: () => set({ user: null }),
 
       addProduct: (product) =>
         set((state) => ({
@@ -146,6 +151,7 @@ const useShopStore = create(
         products: state.products,
         cart: state.cart,
         favorites: state.favorites,
+        user: state.user,
       }),
     }
   )

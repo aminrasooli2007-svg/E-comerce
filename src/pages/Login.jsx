@@ -1,22 +1,56 @@
 
 import { useState } from "react";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { useTranslation } from "react-i18next";
 import { LogIn, Mail, Lock } from "lucide-react";
 import Header from "../components/layout/Header";
 import Footer from "../components/layout/Footer";
+import useShopStore from "../store/useShopStore";
 
 function Login() {
   const { t, i18n } = useTranslation();
   const isEnglish = i18n.language === "en";
+  const navigate = useNavigate();
+
+  const login = useShopStore((state) => state.login);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
+  const [isError, setIsError] = useState(false);
 
   function handleSubmit(event) {
     event.preventDefault();
-    setMessage(t("loginSuccessMessage"));
+
+    const normalizedEmail = email.trim().toLowerCase();
+
+    if (
+      normalizedEmail === "admin@nikmarket.com" &&
+      password === "Admin12345"
+    ) {
+      login({
+        email: normalizedEmail,
+        role: "admin",
+        name: isEnglish ? "Administrator" : "مدیر فروشگاه",
+      });
+
+      navigate("/admin/products");
+      return;
+    }
+
+    if (normalizedEmail === "admin@nikmarket.com") {
+      setIsError(true);
+      setMessage(t("loginInvalidCredentials"));
+      return;
+    }
+
+    login({
+      email: normalizedEmail,
+      role: "user",
+      name: normalizedEmail.split("@")[0],
+    });
+
+    navigate("/");
   }
 
   return (
@@ -90,7 +124,13 @@ function Login() {
           </form>
 
           {message && (
-            <p className="mt-5 rounded-xl bg-[#F5F3EE] p-3 text-center text-sm text-[#173D35]">
+            <p
+              className={`mt-5 rounded-xl p-3 text-center text-sm ${
+                isError
+                  ? "bg-red-50 text-red-700"
+                  : "bg-[#F5F3EE] text-[#173D35]"
+              }`}
+            >
               {message}
             </p>
           )}

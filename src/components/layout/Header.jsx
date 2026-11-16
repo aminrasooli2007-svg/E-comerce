@@ -1,36 +1,45 @@
 
 import { useState } from "react";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { useTranslation } from "react-i18next";
 import {
-  Search,
   ShoppingBag,
   UserRound,
   Heart,
   Menu,
   X,
   Languages,
+  Settings,
+  LayoutDashboard,
+  LogOut,
 } from "lucide-react";
 import useShopStore from "../../store/useShopStore";
 
-function Header({ search = "", setSearch = () => {} }) {
+function Header() {
   const [mobileMenu, setMobileMenu] = useState(false);
 
   const { t, i18n } = useTranslation();
+  const navigate = useNavigate();
 
   const cart = useShopStore((state) => state.cart);
   const favorites = useShopStore((state) => state.favorites);
+  const user = useShopStore((state) => state.user);
+  const logout = useShopStore((state) => state.logout);
 
   const isEnglish = i18n.language === "en";
+  const isAdmin = user?.role === "admin";
 
-  const cartCount = cart.reduce((sum, item) => {
-    return sum + item.quantity;
-  }, 0);
+  const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
 
   const changeLanguage = () => {
-    const newLanguage = isEnglish ? "fa" : "en";
-    i18n.changeLanguage(newLanguage);
+    i18n.changeLanguage(isEnglish ? "fa" : "en");
     setMobileMenu(false);
+  };
+
+  const handleLogout = () => {
+    logout();
+    setMobileMenu(false);
+    navigate("/");
   };
 
   return (
@@ -83,18 +92,17 @@ function Header({ search = "", setSearch = () => {} }) {
             <Link to="/#about" className="transition hover:text-[#B89563]">
               {t("about")}
             </Link>
+
+            {isAdmin && (
+              <Link
+                to="/admin/products"
+                className="flex items-center gap-1.5 font-bold text-[#173D35] transition hover:text-[#B89563]"
+              >
+                <LayoutDashboard size={17} />
+                {t("adminPanel")}
+              </Link>
+            )}
           </nav>
-
-          <div className="hidden max-w-md flex-1 items-center rounded-xl border border-[#E8E5DC] bg-white px-3 py-2.5 lg:flex">
-            <Search size={19} className="text-[#92958F]" />
-
-            <input
-              value={search}
-              onChange={(event) => setSearch(event.target.value)}
-              placeholder={t("search")}
-              className="w-full bg-transparent px-3 text-sm outline-none"
-            />
-          </div>
 
           <div className="flex shrink-0 items-center gap-1 sm:gap-2">
             <button
@@ -106,6 +114,15 @@ function Header({ search = "", setSearch = () => {} }) {
               <Languages size={18} />
               <span>{isEnglish ? "FA" : "EN"}</span>
             </button>
+
+            <Link
+              to="/settings"
+              className="rounded-xl p-2.5 transition hover:bg-[#EFEEE8]"
+              aria-label={t("settings")}
+              title={t("settings")}
+            >
+              <Settings size={21} />
+            </Link>
 
             <Link
               to="/wishlist"
@@ -135,26 +152,29 @@ function Header({ search = "", setSearch = () => {} }) {
               )}
             </Link>
 
-            <Link
-              to="/login"
-              className="hidden items-center gap-2 rounded-xl border border-[#173D35] px-4 py-2.5 text-sm font-semibold transition hover:bg-[#173D35] hover:text-white sm:flex"
-            >
-              <UserRound size={18} />
-              {t("login")}
-            </Link>
-          </div>
-        </div>
+            {user ? (
+              <div className="hidden items-center gap-2 sm:flex">
+                <span className="max-w-28 truncate text-sm font-semibold text-[#173D35]">
+                  {user.name}
+                </span>
 
-        <div className="px-4 pb-3 lg:hidden">
-          <div className="flex items-center rounded-xl border border-[#E8E5DC] bg-white px-3 py-2.5">
-            <Search size={19} className="text-[#92958F]" />
-
-            <input
-              value={search}
-              onChange={(event) => setSearch(event.target.value)}
-              placeholder={t("search")}
-              className="w-full bg-transparent px-3 text-sm outline-none"
-            />
+                <button
+                  onClick={handleLogout}
+                  className="flex items-center gap-1.5 rounded-xl border border-[#173D35] px-3 py-2.5 text-sm font-semibold transition hover:bg-[#173D35] hover:text-white"
+                >
+                  <LogOut size={17} />
+                  {t("logout")}
+                </button>
+              </div>
+            ) : (
+              <Link
+                to="/login"
+                className="hidden items-center gap-2 rounded-xl border border-[#173D35] px-4 py-2.5 text-sm font-semibold transition hover:bg-[#173D35] hover:text-white sm:flex"
+              >
+                <UserRound size={18} />
+                {t("login")}
+              </Link>
+            )}
           </div>
         </div>
 
@@ -185,9 +205,34 @@ function Header({ search = "", setSearch = () => {} }) {
                 {t("wishlist")}
               </Link>
 
-              <Link to="/login" onClick={() => setMobileMenu(false)}>
-                {t("login")}
+              <Link to="/settings" onClick={() => setMobileMenu(false)}>
+                {t("settings")}
               </Link>
+
+              {isAdmin && (
+                <Link
+                  to="/admin/products"
+                  onClick={() => setMobileMenu(false)}
+                  className="flex items-center gap-2 font-bold text-[#173D35]"
+                >
+                  <LayoutDashboard size={18} />
+                  {t("adminPanel")}
+                </Link>
+              )}
+
+              {user ? (
+                <button
+                  onClick={handleLogout}
+                  className="flex items-center gap-2 text-start font-semibold text-red-600"
+                >
+                  <LogOut size={18} />
+                  {t("logout")}
+                </button>
+              ) : (
+                <Link to="/login" onClick={() => setMobileMenu(false)}>
+                  {t("login")}
+                </Link>
+              )}
 
               <button
                 onClick={changeLanguage}

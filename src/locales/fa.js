@@ -241,6 +241,10 @@ adminProductAdded: "محصول جدید با موفقیت اضافه شد.",
 adminProductDeleted: "محصول با موفقیت حذف شد.",
 adminCloseForm: "بستن فرم",
 
+adminPanel: "پنل مدیریت",
+logout: "خروج از حساب",
+loginInvalidCredentials: "ایمیل یا رمز عبور ادمین اشتباه است.",
+
 };
 
 export default translation;

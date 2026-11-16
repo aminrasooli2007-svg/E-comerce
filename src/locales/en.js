@@ -241,6 +241,10 @@ adminProductAdded: "New product added successfully.",
 adminProductDeleted: "Product deleted successfully.",
 adminCloseForm: "Close form",
 
+adminPanel: "Admin Panel",
+logout: "Log Out",
+loginInvalidCredentials: "Incorrect admin email or password.",
+
 };
 
 export default translation;
