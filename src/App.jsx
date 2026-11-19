@@ -11,6 +11,7 @@ import Register from "./pages/Register";
 import Settings from "./pages/Settings";
 import AdminProducts from "./pages/AdminProducts";
 import AdminDashboard from "./pages/AdminDashboard";
+import AdminOrders from "./pages/AdminOrders";
 import useShopStore from "./store/useShopStore";
 
 function AdminRoute({ children }) {
@@ -50,6 +51,15 @@ function App() {
           element={
             <AdminRoute>
               <AdminProducts />
+            </AdminRoute>
+          }
+        />
+
+        <Route
+          path="/admin/orders"
+          element={
+            <AdminRoute>
+              <AdminOrders />
             </AdminRoute>
           }
         />

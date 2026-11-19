@@ -1,5 +1,5 @@
 
-import { Link } from "react-router";
+import { Link, useLocation } from "react-router";
 import { useTranslation } from "react-i18next";
 import {
   LayoutDashboard,
@@ -22,6 +22,8 @@ import useShopStore from "../store/useShopStore";
 
 function AdminDashboard() {
   const { t, i18n } = useTranslation();
+  const location = useLocation();
+
   const isEnglish = i18n.language === "en";
   const dir = isEnglish ? "ltr" : "rtl";
 
@@ -33,7 +35,6 @@ function AdminDashboard() {
       title: t("dashboardOverview"),
       path: "/admin",
       icon: LayoutDashboard,
-      active: true,
     },
     {
       title: t("dashboardProducts"),
@@ -81,7 +82,10 @@ function AdminDashboard() {
     },
     {
       title: t("dashboardCartItems"),
-      value: cart.reduce((total, item) => total + Number(item.quantity || 1), 0),
+      value: cart.reduce(
+        (total, item) => total + Number(item.quantity || 1),
+        0
+      ),
       icon: ShoppingCart,
       description: t("dashboardCartDescription"),
     },
@@ -105,6 +109,14 @@ function AdminDashboard() {
   const ArrowIcon = isEnglish ? ArrowUpRight : ArrowUpLeft;
   const DirectionIcon = isEnglish ? ChevronRight : ChevronLeft;
 
+  const isActive = (path) => {
+    if (path === "/admin") {
+      return location.pathname === "/admin";
+    }
+
+    return location.pathname === path;
+  };
+
   return (
     <div dir={dir} className="min-h-screen bg-[#F5F3EE] lg:flex">
       <aside className="w-full border-b border-gray-100 bg-white lg:sticky lg:top-0 lg:h-screen lg:w-72 lg:shrink-0 lg:border-b-0 lg:border-e lg:border-gray-100">
@@ -112,6 +124,7 @@ function AdminDashboard() {
           <Link to="/" className="text-2xl font-black text-[#173D35]">
             {isEnglish ? "NikMarket" : "نیک‌مارکت"}
           </Link>
+
           <span className="rounded-lg bg-[#F5F3EE] p-2 text-[#173D35]">
             <Store size={21} />
           </span>
@@ -125,19 +138,46 @@ function AdminDashboard() {
           <nav className="grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-1">
             {menuItems.map((item) => {
               const Icon = item.icon;
+              const active = isActive(item.path);
 
               return (
                 <Link
                   key={item.path}
                   to={item.path}
-                  className={`flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold transition ${
-                    item.active
-                      ? "bg-[#173D35] text-white"
-                      : "text-gray-600 hover:bg-[#F5F3EE] hover:text-[#173D35]"
+                  style={
+                    active
+                      ? {
+                          backgroundColor: "#173D35",
+                          color: "#FFFFFF",
+                        }
+                      : undefined
+                  }
+                  className={`group flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold transition ${
+                    active
+                      ? "!bg-[#173D35] !text-white"
+                      : "text-gray-600 hover:!bg-[#173D35] hover:!text-white"
                   }`}
                 >
-                  <Icon size={19} />
-                  <span className="truncate">{item.title}</span>
+                  <Icon
+                    size={19}
+                    style={active ? { color: "#FFFFFF" } : undefined}
+                    className={`shrink-0 ${
+                      active
+                        ? "!text-white"
+                        : "text-gray-600 group-hover:!text-white"
+                    }`}
+                  />
+
+                  <span
+                    style={active ? { color: "#FFFFFF" } : undefined}
+                    className={`truncate ${
+                      active
+                        ? "!text-white"
+                        : "text-gray-600 group-hover:!text-white"
+                    }`}
+                  >
+                    {item.title}
+                  </span>
                 </Link>
               );
             })}
@@ -147,7 +187,7 @@ function AdminDashboard() {
         <div className="hidden px-5 lg:absolute lg:bottom-6 lg:block lg:w-full">
           <Link
             to="/"
-            className="flex items-center justify-between rounded-xl border border-gray-100 p-4 text-sm font-semibold text-gray-600 transition hover:border-[#173D35] hover:text-[#173D35]"
+            className="flex items-center justify-between rounded-xl border border-gray-100 p-4 text-sm font-semibold text-gray-600 transition hover:border-[#173D35] hover:bg-[#173D35] hover:text-white"
           >
             {t("dashboardBackToStore")}
             <ArrowIcon size={18} />
@@ -161,9 +201,11 @@ function AdminDashboard() {
             <p className="mb-2 text-sm font-medium text-gray-400">
               {t("dashboardWelcome")}
             </p>
+
             <h1 className="text-2xl font-black text-[#173D35] sm:text-3xl">
               {t("dashboardTitle")}
             </h1>
+
             <p className="mt-2 text-sm text-gray-500">
               {t("dashboardDescription")}
             </p>
@@ -171,10 +213,13 @@ function AdminDashboard() {
 
           <Link
             to="/admin/products"
-            className="flex items-center justify-center gap-2 rounded-xl bg-[#173D35] px-5 py-3 text-sm font-bold text-white transition hover:bg-[#245448]"
+            className="group flex items-center justify-center gap-2 rounded-xl bg-[#173D35] px-5 py-3 text-sm font-bold !text-white transition hover:bg-[#245448]"
           >
-            <Package size={18} />
-            {t("dashboardManageProducts")}
+            <Package size={18} className="!text-white" />
+
+            <span className="!text-white">
+              {t("dashboardManageProducts")}
+            </span>
           </Link>
         </header>
 
@@ -191,6 +236,7 @@ function AdminDashboard() {
                   <span className="rounded-xl bg-[#F5F3EE] p-3 text-[#173D35]">
                     <Icon size={22} />
                   </span>
+
                   <span className="text-xs font-semibold text-gray-400">
                     {t("dashboardStatistics")}
                   </span>
@@ -199,9 +245,11 @@ function AdminDashboard() {
                 <p className="text-sm font-medium text-gray-500">
                   {stat.title}
                 </p>
+
                 <p className="mt-2 text-3xl font-black text-[#173D35]">
                   {formatNumber(stat.value)}
                 </p>
+
                 <p className="mt-2 text-xs text-gray-400">
                   {stat.description}
                 </p>
@@ -217,10 +265,12 @@ function AdminDashboard() {
                 <h2 className="text-lg font-black text-[#173D35]">
                   {t("dashboardSalesOverview")}
                 </h2>
+
                 <p className="mt-1 text-xs text-gray-400">
                   {t("dashboardSalesComingSoon")}
                 </p>
               </div>
+
               <span className="rounded-xl bg-[#F5F3EE] p-3 text-[#173D35]">
                 <TrendingUp size={21} />
               </span>
@@ -228,9 +278,11 @@ function AdminDashboard() {
 
             <div className="flex min-h-64 flex-col items-center justify-center rounded-xl border border-dashed border-gray-200 bg-[#FAF9F6] px-5 text-center">
               <TrendingUp size={35} className="mb-4 text-[#D8B98C]" />
+
               <p className="font-bold text-gray-600">
                 {t("dashboardChartPlaceholder")}
               </p>
+
               <p className="mt-2 max-w-sm text-sm leading-7 text-gray-400">
                 {t("dashboardChartDescription")}
               </p>
@@ -242,10 +294,12 @@ function AdminDashboard() {
               <span className="rounded-xl bg-[#F5F3EE] p-3 text-[#173D35]">
                 <Clock3 size={21} />
               </span>
+
               <div>
                 <h2 className="font-black text-[#173D35]">
                   {t("dashboardRecentOrders")}
                 </h2>
+
                 <p className="mt-1 text-xs text-gray-400">
                   {t("dashboardOrderStatus")}
                 </p>
@@ -254,9 +308,11 @@ function AdminDashboard() {
 
             <div className="flex min-h-48 flex-col items-center justify-center text-center">
               <ShoppingCart size={34} className="mb-4 text-gray-300" />
+
               <p className="font-semibold text-gray-500">
                 {t("dashboardNoOrders")}
               </p>
+
               <p className="mt-2 text-xs text-gray-400">
                 {t("dashboardOrdersComingSoon")}
               </p>
@@ -265,15 +321,14 @@ function AdminDashboard() {
         </section>
 
         <section className="rounded-2xl border border-gray-100 bg-white p-6">
-          <div className="mb-6 flex items-center justify-between">
-            <div>
-              <h2 className="text-lg font-black text-[#173D35]">
-                {t("dashboardQuickAccess")}
-              </h2>
-              <p className="mt-1 text-sm text-gray-400">
-                {t("dashboardQuickAccessDescription")}
-              </p>
-            </div>
+          <div className="mb-6">
+            <h2 className="text-lg font-black text-[#173D35]">
+              {t("dashboardQuickAccess")}
+            </h2>
+
+            <p className="mt-1 text-sm text-gray-400">
+              {t("dashboardQuickAccessDescription")}
+            </p>
           </div>
 
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
@@ -290,10 +345,12 @@ function AdminDashboard() {
                     <span className="rounded-lg bg-[#F5F3EE] p-2 text-[#173D35]">
                       <Icon size={19} />
                     </span>
+
                     <span className="text-sm font-bold text-gray-600">
                       {item.title}
                     </span>
                   </div>
+
                   <DirectionIcon
                     size={17}
                     className="text-gray-400 transition group-hover:text-[#173D35]"
