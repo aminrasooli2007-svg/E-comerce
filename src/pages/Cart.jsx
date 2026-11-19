@@ -1,12 +1,13 @@
 
-import { Link } from "react-router";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router";
 import { useTranslation } from "react-i18next";
-
 import {
   ShoppingBag,
   Trash2,
   Plus,
   Minus,
+  CheckCircle2,
 } from "lucide-react";
 
 import Header from "../components/layout/Header";
@@ -18,11 +19,16 @@ import { formatPrice } from "../data/products";
 function Cart() {
   const { t, i18n } = useTranslation();
   const isEnglish = i18n.language === "en";
+  const navigate = useNavigate();
+
+  const [successMessage, setSuccessMessage] = useState("");
 
   const cart = useShopStore((state) => state.cart);
+  const user = useShopStore((state) => state.user);
   const removeFromCart = useShopStore((state) => state.removeFromCart);
   const updateQuantity = useShopStore((state) => state.updateQuantity);
   const clearCart = useShopStore((state) => state.clearCart);
+  const createOrder = useShopStore((state) => state.createOrder);
 
   const totalPrice = cart.reduce((total, item) => {
     return total + item.price * item.quantity;
@@ -32,6 +38,25 @@ function Cart() {
     return sum + item.quantity;
   }, 0);
 
+  const handleCheckout = () => {
+    if (!user) {
+      navigate("/login");
+      return;
+    }
+
+    const order = createOrder();
+
+    if (!order) {
+      return;
+    }
+
+    setSuccessMessage(
+      isEnglish
+        ? `Your order ${order.id} was registered successfully.`
+        : `سفارش ${order.id} با موفقیت ثبت شد.`
+    );
+  };
+
   return (
     <div
       dir={isEnglish ? "ltr" : "rtl"}
@@ -40,9 +65,27 @@ function Cart() {
       <Header />
 
       <main className="mx-auto max-w-7xl px-4 py-10 lg:px-8">
-        <h1 className="text-2xl font-black">
-          {t("myCart")}
-        </h1>
+        <h1 className="text-2xl font-black">{t("myCart")}</h1>
+
+        {successMessage && (
+          <div className="mt-6 flex flex-wrap items-center gap-3 rounded-2xl border border-green-200 bg-green-50 p-5 text-green-800">
+            <CheckCircle2 size={24} />
+            <div className="min-w-0 flex-1">
+              <p className="font-bold">{successMessage}</p>
+              <p className="mt-1 text-sm">
+                {isEnglish
+                  ? "You can view your order in the admin panel."
+                  : "می‌توانی سفارش ثبت‌شده را در پنل مدیریت مشاهده کنی."}
+              </p>
+            </div>
+            <Link
+              to="/products"
+              className="rounded-xl bg-[#173D35] px-4 py-2 text-sm font-bold text-white"
+            >
+              {t("viewProducts")}
+            </Link>
+          </div>
+        )}
 
         {cart.length === 0 ? (
           <div className="mt-10 rounded-2xl border border-[#EAE8E1] bg-white py-20 text-center">
@@ -51,9 +94,7 @@ function Cart() {
               className="mx-auto mb-5 text-gray-400"
             />
 
-            <h2 className="text-lg font-bold">
-              {t("emptyCart")}
-            </h2>
+            <h2 className="text-lg font-bold">{t("emptyCart")}</h2>
 
             <Link
               to="/products"
@@ -94,9 +135,7 @@ function Cart() {
                         <Minus size={15} />
                       </button>
 
-                      <span className="font-bold">
-                        {item.quantity}
-                      </span>
+                      <span className="font-bold">{item.quantity}</span>
 
                       <button
                         onClick={() =>
@@ -129,15 +168,10 @@ function Cart() {
             </div>
 
             <div className="h-fit rounded-2xl border border-[#EAE8E1] bg-white p-5">
-              <h2 className="text-lg font-bold">
-                {t("orderSummary")}
-              </h2>
+              <h2 className="text-lg font-bold">{t("orderSummary")}</h2>
 
               <div className="mt-6 flex justify-between text-sm">
-                <span className="text-gray-500">
-                  {t("productCount")}
-                </span>
-
+                <span className="text-gray-500">{t("productCount")}</span>
                 <span>{totalItems}</span>
               </div>
 
@@ -150,11 +184,19 @@ function Cart() {
               </div>
 
               <button
-                disabled
-                className="mt-7 w-full cursor-not-allowed rounded-xl bg-gray-300 py-3 font-bold text-gray-600"
+                onClick={handleCheckout}
+                className="mt-7 w-full rounded-xl bg-[#173D35] py-3 font-bold text-white transition hover:bg-[#245448]"
               >
-                {t("checkoutComingSoon")}
+                {isEnglish ? "Complete Order" : "ثبت سفارش"}
               </button>
+
+              {!user && (
+                <p className="mt-3 text-center text-xs text-gray-400">
+                  {isEnglish
+                    ? "You need to log in before placing an order."
+                    : "برای ثبت سفارش ابتدا وارد حساب کاربری شو."}
+                </p>
+              )}
             </div>
           </div>
         )}
