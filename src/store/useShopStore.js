@@ -45,6 +45,7 @@ const useShopStore = create(
       cart: [],
       favorites: [],
       user: null,
+      orders: [],
 
       login: (user) => set({ user }),
 
@@ -133,6 +134,56 @@ const useShopStore = create(
 
       clearCart: () => set({ cart: [] }),
 
+      createOrder: () => {
+        let createdOrder = null;
+
+        set((state) => {
+          if (state.cart.length === 0) {
+            return {};
+          }
+
+          const orderItems = state.cart.map((item) => ({
+            ...item,
+            quantity: Number(item.quantity) || 1,
+          }));
+
+          const totalPrice = orderItems.reduce(
+            (total, item) => total + item.price * item.quantity,
+            0
+          );
+
+          createdOrder = {
+            id: `NM-${Date.now()}`,
+            user: state.user,
+            items: orderItems,
+            totalPrice,
+            status: "pending",
+            createdAt: new Date().toISOString(),
+          };
+
+          return {
+            orders: [createdOrder, ...state.orders],
+            cart: [],
+          };
+        });
+
+        return createdOrder;
+      },
+
+      updateOrderStatus: (orderId, status) =>
+        set((state) => ({
+          orders: state.orders.map((order) =>
+            order.id === orderId
+              ? { ...order, status, updatedAt: new Date().toISOString() }
+              : order
+          ),
+        })),
+
+      deleteOrder: (orderId) =>
+        set((state) => ({
+          orders: state.orders.filter((order) => order.id !== orderId),
+        })),
+
       toggleFavorite: (productId) =>
         set((state) => {
           const isFavorite = state.favorites.includes(productId);
@@ -152,6 +203,7 @@ const useShopStore = create(
         cart: state.cart,
         favorites: state.favorites,
         user: state.user,
+        orders: state.orders,
       }),
     }
   )
