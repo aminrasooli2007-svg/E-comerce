@@ -20,6 +20,9 @@ import AdminProducts from "./pages/AdminProducts";
 import AdminOrders from "./pages/AdminOrders";
 import AdminUsers from "./pages/AdminUsers";
 import AdminCategories from "./pages/AdminCategories";
+import AdminCoupons from "./pages/AdminCoupons";
+import AdminReviews from "./pages/AdminReviews";
+import AdminStoreSettings from "./pages/AdminStoreSettings";
 
 import useShopStore from "./store/useShopStore";
 
@@ -97,6 +100,33 @@ function App() {
           element={
             <AdminRoute>
               <AdminCategories />
+            </AdminRoute>
+          }
+        />
+
+        <Route
+          path="/admin/coupons"
+          element={
+            <AdminRoute>
+              <AdminCoupons />
+            </AdminRoute>
+          }
+        />
+
+        <Route
+          path="/admin/reviews"
+          element={
+            <AdminRoute>
+              <AdminReviews />
+            </AdminRoute>
+          }
+        />
+
+        <Route
+          path="/admin/settings"
+          element={
+            <AdminRoute>
+              <AdminStoreSettings />
             </AdminRoute>
           }
         />
