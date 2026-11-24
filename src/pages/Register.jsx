@@ -5,19 +5,35 @@ import { useTranslation } from "react-i18next";
 import { UserPlus, User, Mail, Lock } from "lucide-react";
 import Header from "../components/layout/Header";
 import Footer from "../components/layout/Footer";
+import useShopStore from "../store/useShopStore";
 
 function Register() {
   const { t, i18n } = useTranslation();
   const isEnglish = i18n.language === "en";
+
+  const registerUser = useShopStore((state) => state.registerUser);
+  const users = useShopStore((state) => state.users);
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [message, setMessage] = useState("");
+  const [isSuccess, setIsSuccess] = useState(false);
 
   function handleSubmit(event) {
     event.preventDefault();
+
+    setMessage("");
+    setIsSuccess(false);
+
+    const trimmedName = name.trim();
+    const normalizedEmail = email.trim().toLowerCase();
+
+    if (!trimmedName) {
+      setMessage(isEnglish ? "Please enter your name." : "لطفاً نام خود را وارد کنید.");
+      return;
+    }
 
     if (password.length < 8) {
       setMessage(t("passwordTooShort"));
@@ -29,7 +45,32 @@ function Register() {
       return;
     }
 
+    const existingUser = users.some(
+      (user) => user.email?.trim().toLowerCase() === normalizedEmail
+    );
+
+    if (existingUser) {
+      setMessage(
+        isEnglish
+          ? "An account with this email already exists."
+          : "با این ایمیل قبلاً حساب کاربری ساخته شده است."
+      );
+      return;
+    }
+
+    registerUser({
+      name: trimmedName,
+      email: normalizedEmail,
+      role: "user",
+    });
+
+    setIsSuccess(true);
     setMessage(t("registerSuccessMessage"));
+
+    setName("");
+    setEmail("");
+    setPassword("");
+    setConfirmPassword("");
   }
 
   return (
@@ -42,7 +83,7 @@ function Register() {
       <main className="flex min-h-[700px] items-center justify-center px-4 py-16">
         <div className="w-full max-w-md rounded-3xl border border-gray-100 bg-white p-8 shadow-sm sm:p-10">
           <div className="mb-8 text-center">
-            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-[#173D35] text-white">
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-[#173D35] !text-white">
               <UserPlus size={30} />
             </div>
 
@@ -108,6 +149,7 @@ function Register() {
                   onChange={(event) => setPassword(event.target.value)}
                   placeholder={t("minimumPasswordLength")}
                   required
+                  minLength={8}
                   className="w-full bg-transparent py-3 text-sm outline-none"
                 />
               </div>
@@ -127,6 +169,7 @@ function Register() {
                   onChange={(event) => setConfirmPassword(event.target.value)}
                   placeholder={t("repeatPassword")}
                   required
+                  minLength={8}
                   className="w-full bg-transparent py-3 text-sm outline-none"
                 />
               </div>
@@ -134,14 +177,21 @@ function Register() {
 
             <button
               type="submit"
-              className="w-full rounded-xl bg-[#173D35] py-3.5 font-bold text-white transition hover:bg-[#245448]"
+              className="w-full rounded-xl bg-[#173D35] !text-white py-3.5 font-bold transition hover:bg-[#245448]"
             >
               {t("createAccount")}
             </button>
           </form>
 
           {message && (
-            <p className="mt-5 rounded-xl bg-[#F5F3EE] p-3 text-center text-sm text-[#173D35]">
+            <p
+              role="status"
+              className={`mt-5 rounded-xl p-3 text-center text-sm ${
+                isSuccess
+                  ? "bg-[#F5F3EE] text-[#173D35]"
+                  : "bg-red-50 text-red-600"
+              }`}
+            >
               {message}
             </p>
           )}
