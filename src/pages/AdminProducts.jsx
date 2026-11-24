@@ -41,6 +41,7 @@ function AdminProducts() {
   const dir = isEnglish ? "ltr" : "rtl";
 
   const products = useShopStore((state) => state.products);
+  const categories = useShopStore((state) => state.categories);
   const addProduct = useShopStore((state) => state.addProduct);
   const updateProduct = useShopStore((state) => state.updateProduct);
   const deleteProduct = useShopStore((state) => state.deleteProduct);
@@ -63,13 +64,6 @@ function AdminProducts() {
     { title: t("dashboardSettings"), path: "/admin/settings", icon: Settings },
   ];
 
-  const categories = [
-    { value: "دیجیتال", label: t("adminCategoryDigital") },
-    { value: "پوشاک", label: t("adminCategoryClothing") },
-    { value: "اکسسوری", label: t("adminCategoryAccessories") },
-    { value: "خانه", label: t("adminCategoryHome") },
-    { value: "زیبایی", label: t("adminCategoryBeauty") },
-  ];
 
   function isActive(path) {
     if (path === "/admin") {
@@ -89,7 +83,7 @@ function AdminProducts() {
   }
 
   function openAddForm() {
-    setForm(emptyProduct);
+    setForm({ ...emptyProduct, category: categories[0]?.value ?? "" });
     setEditingId(null);
     setShowForm(true);
     setMessage("");
@@ -98,7 +92,9 @@ function AdminProducts() {
   function openEditForm(product) {
     setForm({
       title: product.name ?? product.title ?? "",
-      category: product.category ?? "دیجیتال",
+      category: categories.some((category) => category.value === product.category)
+        ? product.category
+        : categories[0]?.value ?? "",
       price: String(product.price ?? ""),
       oldPrice: String(product.oldPrice ?? ""),
       discount: String(product.discount ?? ""),
@@ -127,6 +123,8 @@ function AdminProducts() {
 
     if (
       !productData.name ||
+      !productData.category ||
+      !categories.some((category) => category.value === productData.category) ||
       !productData.image ||
       !Number.isFinite(productData.price) ||
       productData.price <= 0
@@ -161,11 +159,11 @@ function AdminProducts() {
   );
 
   function getCategoryLabel(category) {
-    return categories.find((item) => item.value === category)?.label ?? category;
+    return categories.find((item) => item.value === category)?.name ?? category;
   }
 
   function formatPrice(price) {
-    return `${Number(price).toLocaleString(isEnglish ? "en-US" : "fa-IR")} ${t("adminToman")}`;
+    return `${Number(price).toLocaleString(isEnglish ? "en-US" : "fa-IR")} ${isEnglish ? "AFN" : "افغانی"}`;
   }
 
   const inputClass =
@@ -305,7 +303,7 @@ function AdminProducts() {
             <div className="rounded-2xl border border-gray-100 bg-white p-5">
               <p className="text-sm text-gray-500">{t("adminCategories")}</p>
               <p className="mt-2 text-2xl font-black text-[#173D35]">
-                {new Set(products.map((product) => product.category)).size}
+                {categories.length}
               </p>
             </div>
           </div>
@@ -364,17 +362,23 @@ function AdminProducts() {
                     onChange={handleChange}
                     className={inputClass}
                   >
-                    {categories.map((category) => (
-                      <option key={category.value} value={category.value}>
-                        {category.label}
+                    {categories.length === 0 ? (
+                      <option value="">
+                        {isEnglish ? "Create a category first" : "ابتدا یک دسته‌بندی بسازید"}
                       </option>
-                    ))}
+                    ) : (
+                      categories.map((category) => (
+                        <option key={category.id} value={category.value}>
+                          {category.name}
+                        </option>
+                      ))
+                    )}
                   </select>
                 </div>
 
                 <div>
                   <label className="mb-2 block text-sm font-semibold text-gray-700">
-                    {t("adminPrice")} ({t("adminToman")})
+                    {t("adminPrice")} ({isEnglish ? "AFN" : "افغانی"})
                   </label>
                   <input
                     type="number"
@@ -389,7 +393,7 @@ function AdminProducts() {
 
                 <div>
                   <label className="mb-2 block text-sm font-semibold text-gray-700">
-                    {t("adminOldPrice")} ({t("adminToman")})
+                    {t("adminOldPrice")} ({isEnglish ? "AFN" : "افغانی"})
                   </label>
                   <input
                     type="number"
