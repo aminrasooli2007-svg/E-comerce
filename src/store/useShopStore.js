@@ -3,6 +3,14 @@ import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import { products as initialProducts } from "../data/products";
 
+const initialCategories = [
+  { id: "digital", name: "دیجیتال", value: "دیجیتال" },
+  { id: "clothing", name: "پوشاک", value: "پوشاک" },
+  { id: "accessories", name: "اکسسوری", value: "اکسسوری" },
+  { id: "home", name: "خانه", value: "خانه" },
+  { id: "beauty", name: "زیبایی", value: "زیبایی" },
+];
+
 function normalizeProduct(product, index) {
   const name = String(product.name ?? product.title ?? "");
 
@@ -33,6 +41,17 @@ function normalizeUser(user, index = 0) {
   };
 }
 
+function normalizeCategory(category, index = 0) {
+  const name = String(category.name ?? category.value ?? "").trim();
+  const value = String(category.value ?? name).trim();
+
+  return {
+    id: category.id ?? `category-${Date.now()}-${index}`,
+    name,
+    value,
+  };
+}
+
 function getInitialProducts() {
   try {
     const savedProducts = localStorage.getItem("nik-market-admin-products");
@@ -55,11 +74,96 @@ const useShopStore = create(
   persist(
     (set) => ({
       products: getInitialProducts(),
+      categories: initialCategories,
       cart: [],
       favorites: [],
       user: null,
       users: [],
       orders: [],
+
+      addCategory: (categoryName) =>
+        set((state) => {
+          const name = String(categoryName ?? "").trim();
+
+          if (
+            !name ||
+            state.categories.some(
+              (category) =>
+                category.name.toLowerCase() === name.toLowerCase()
+            )
+          ) {
+            return {};
+          }
+
+          const category = normalizeCategory({
+            id: `category-${Date.now()}`,
+            name,
+            value: name,
+          });
+
+          return {
+            categories: [...state.categories, category],
+          };
+        }),
+
+      updateCategory: (categoryId, newName) =>
+        set((state) => {
+          const name = String(newName ?? "").trim();
+
+          if (
+            !name ||
+            state.categories.some(
+              (category) =>
+                category.id !== categoryId &&
+                category.name.toLowerCase() === name.toLowerCase()
+            )
+          ) {
+            return {};
+          }
+
+          const oldCategory = state.categories.find(
+            (category) => category.id === categoryId
+          );
+
+          if (!oldCategory) {
+            return {};
+          }
+
+          return {
+            categories: state.categories.map((category) =>
+              category.id === categoryId
+                ? { ...category, name, value: name }
+                : category
+            ),
+            products: state.products.map((product) =>
+              product.category === oldCategory.value
+                ? { ...product, category: name }
+                : product
+            ),
+          };
+        }),
+
+      deleteCategory: (categoryId) =>
+        set((state) => {
+          const category = state.categories.find(
+            (item) => item.id === categoryId
+          );
+
+          if (!category) {
+            return {};
+          }
+
+          return {
+            categories: state.categories.filter(
+              (item) => item.id !== categoryId
+            ),
+            products: state.products.map((product) =>
+              product.category === category.value
+                ? { ...product, category: "بدون دسته‌بندی" }
+                : product
+            ),
+          };
+        }),
 
       login: (user) =>
         set((state) => {
@@ -121,9 +225,7 @@ const useShopStore = create(
           }
 
           const users = state.users.map((item) =>
-            item.id === userId
-              ? { ...item, role }
-              : item
+            item.id === userId ? { ...item, role } : item
           );
 
           const updatedUser = users.find(
@@ -216,10 +318,7 @@ const useShopStore = create(
             return {
               cart: state.cart.map((item) =>
                 item.id === product.id
-                  ? {
-                      ...item,
-                      quantity: item.quantity + 1,
-                    }
+                  ? { ...item, quantity: item.quantity + 1 }
                   : item
               ),
             };
@@ -329,6 +428,7 @@ const useShopStore = create(
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({
         products: state.products,
+        categories: state.categories,
         cart: state.cart,
         favorites: state.favorites,
         user: state.user,
