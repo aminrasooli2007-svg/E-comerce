@@ -20,6 +20,19 @@ function normalizeProduct(product, index) {
   };
 }
 
+function normalizeUser(user, index = 0) {
+  const email = String(user.email ?? "").trim().toLowerCase();
+
+  return {
+    ...user,
+    id: user.id ?? `user-${Date.now()}-${index}`,
+    name: String(user.name ?? user.fullName ?? "کاربر"),
+    email,
+    role: user.role === "admin" ? "admin" : "user",
+    createdAt: user.createdAt ?? new Date().toISOString(),
+  };
+}
+
 function getInitialProducts() {
   try {
     const savedProducts = localStorage.getItem("nik-market-admin-products");
@@ -45,11 +58,103 @@ const useShopStore = create(
       cart: [],
       favorites: [],
       user: null,
+      users: [],
       orders: [],
 
-      login: (user) => set({ user }),
+      login: (user) =>
+        set((state) => {
+          const normalizedUser = normalizeUser(user);
+          const existingUser = state.users.find(
+            (item) => item.email === normalizedUser.email
+          );
+
+          const users = existingUser
+            ? state.users.map((item) =>
+                item.email === normalizedUser.email
+                  ? {
+                      ...item,
+                      ...normalizedUser,
+                      id: item.id,
+                      role: item.role,
+                    }
+                  : item
+              )
+            : [...state.users, normalizedUser];
+
+          const savedUser = users.find(
+            (item) => item.email === normalizedUser.email
+          );
+
+          return {
+            user: savedUser,
+            users,
+          };
+        }),
+
+      registerUser: (user) => {
+        const normalizedUser = normalizeUser(user);
+
+        set((state) => {
+          const alreadyExists = state.users.some(
+            (item) => item.email === normalizedUser.email
+          );
+
+          if (alreadyExists) {
+            return {};
+          }
+
+          return {
+            users: [...state.users, normalizedUser],
+            user: normalizedUser,
+          };
+        });
+
+        return normalizedUser;
+      },
 
       logout: () => set({ user: null }),
+
+      updateUserRole: (userId, role) =>
+        set((state) => {
+          if (role !== "admin" && role !== "user") {
+            return {};
+          }
+
+          const users = state.users.map((item) =>
+            item.id === userId
+              ? { ...item, role }
+              : item
+          );
+
+          const updatedUser = users.find(
+            (item) => item.id === userId
+          );
+
+          return {
+            users,
+            user:
+              state.user?.id === userId && updatedUser
+                ? updatedUser
+                : state.user,
+          };
+        }),
+
+      deleteUser: (userId) =>
+        set((state) => {
+          const userToDelete = state.users.find(
+            (item) => item.id === userId
+          );
+
+          if (!userToDelete || state.user?.id === userId) {
+            return {};
+          }
+
+          return {
+            users: state.users.filter(
+              (item) => item.id !== userId
+            ),
+          };
+        }),
 
       addProduct: (product) =>
         set((state) => ({
@@ -73,8 +178,14 @@ const useShopStore = create(
                   {
                     ...product,
                     ...updatedData,
-                    name: updatedData.name ?? updatedData.title ?? product.name,
-                    title: updatedData.title ?? updatedData.name ?? product.name,
+                    name:
+                      updatedData.name ??
+                      updatedData.title ??
+                      product.name,
+                    title:
+                      updatedData.title ??
+                      updatedData.name ??
+                      product.name,
                   },
                   0
                 )
@@ -87,8 +198,12 @@ const useShopStore = create(
           products: state.products.filter(
             (product) => product.id !== productId
           ),
-          cart: state.cart.filter((item) => item.id !== productId),
-          favorites: state.favorites.filter((id) => id !== productId),
+          cart: state.cart.filter(
+            (item) => item.id !== productId
+          ),
+          favorites: state.favorites.filter(
+            (id) => id !== productId
+          ),
         })),
 
       addToCart: (product) =>
@@ -101,7 +216,10 @@ const useShopStore = create(
             return {
               cart: state.cart.map((item) =>
                 item.id === product.id
-                  ? { ...item, quantity: item.quantity + 1 }
+                  ? {
+                      ...item,
+                      quantity: item.quantity + 1,
+                    }
                   : item
               ),
             };
@@ -114,7 +232,9 @@ const useShopStore = create(
 
       removeFromCart: (productId) =>
         set((state) => ({
-          cart: state.cart.filter((item) => item.id !== productId),
+          cart: state.cart.filter(
+            (item) => item.id !== productId
+          ),
         })),
 
       updateQuantity: (productId, newQuantity) =>
@@ -148,7 +268,8 @@ const useShopStore = create(
           }));
 
           const totalPrice = orderItems.reduce(
-            (total, item) => total + item.price * item.quantity,
+            (total, item) =>
+              total + item.price * item.quantity,
             0
           );
 
@@ -174,14 +295,20 @@ const useShopStore = create(
         set((state) => ({
           orders: state.orders.map((order) =>
             order.id === orderId
-              ? { ...order, status, updatedAt: new Date().toISOString() }
+              ? {
+                  ...order,
+                  status,
+                  updatedAt: new Date().toISOString(),
+                }
               : order
           ),
         })),
 
       deleteOrder: (orderId) =>
         set((state) => ({
-          orders: state.orders.filter((order) => order.id !== orderId),
+          orders: state.orders.filter(
+            (order) => order.id !== orderId
+          ),
         })),
 
       toggleFavorite: (productId) =>
@@ -190,7 +317,9 @@ const useShopStore = create(
 
           return {
             favorites: isFavorite
-              ? state.favorites.filter((id) => id !== productId)
+              ? state.favorites.filter(
+                  (id) => id !== productId
+                )
               : [...state.favorites, productId],
           };
         }),
@@ -203,6 +332,7 @@ const useShopStore = create(
         cart: state.cart,
         favorites: state.favorites,
         user: state.user,
+        users: state.users,
         orders: state.orders,
       }),
     }
