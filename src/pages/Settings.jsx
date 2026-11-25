@@ -1,5 +1,4 @@
-
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router";
 import { useTranslation } from "react-i18next";
 import {
@@ -18,14 +17,17 @@ import {
 } from "lucide-react";
 import Header from "../components/layout/Header";
 import Footer from "../components/layout/Footer";
+import useShopStore from "../store/useShopStore";
+
+const STORAGE_KEY = "nik-market-settings";
 
 const defaultSettings = {
   name: "",
   email: "",
   phone: "",
   language: "fa",
-  country: "iran",
-  currency: "toman",
+  country: "afghanistan",
+  currency: "afn",
   theme: "light",
   fontSize: "normal",
   orderNotifications: true,
@@ -43,45 +45,61 @@ const defaultSettings = {
   reduceAnimations: false,
 };
 
-function getSavedSettings() {
-  try {
-    const savedSettings = localStorage.getItem("nik-market-settings");
+function getSavedSettings(user) {
+  let saved = {};
 
-    if (savedSettings) {
-      return {
-        ...defaultSettings,
-        ...JSON.parse(savedSettings),
-      };
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+        saved = parsed;
+      }
     }
   } catch {
-    return defaultSettings;
+    saved = {};
   }
 
-  return defaultSettings;
+  return {
+    ...defaultSettings,
+    name: user?.name ?? user?.fullName ?? "",
+    email: user?.email ?? "",
+    ...saved,
+    name: saved.name ?? user?.name ?? user?.fullName ?? "",
+    email: saved.email ?? user?.email ?? "",
+  };
 }
 
 function Settings() {
   const { t, i18n } = useTranslation();
+  const user = useShopStore((state) => state.user);
   const isEnglish = i18n.language === "en";
+  const dir = isEnglish ? "ltr" : "rtl";
 
-  const [settings, setSettings] = useState(() => ({
-    ...getSavedSettings(),
-    language: isEnglish ? "en" : "fa",
-  }));
-
+  const [settings, setSettings] = useState(() => getSavedSettings(user));
   const [message, setMessage] = useState("");
+  const [messageType, setMessageType] = useState("success");
+
+  useEffect(() => {
+    setSettings((current) => ({
+      ...current,
+      name: current.name || user?.name || user?.fullName || "",
+      email: current.email || user?.email || "",
+    }));
+  }, [user]);
+
+  useEffect(() => {
+    document.documentElement.lang = settings.language;
+    document.documentElement.dir = settings.language === "en" ? "ltr" : "rtl";
+  }, [settings.language]);
 
   function handleChange(event) {
     const { name, value, type, checked } = event.target;
 
-    setSettings((previousSettings) => ({
-      ...previousSettings,
+    setSettings((current) => ({
+      ...current,
       [name]: type === "checkbox" ? checked : value,
     }));
-
-    if (name === "language") {
-      i18n.changeLanguage(value);
-    }
 
     setMessage("");
   }
@@ -89,28 +107,44 @@ function Settings() {
   function handleSubmit(event) {
     event.preventDefault();
 
-    localStorage.setItem(
-      "nik-market-settings",
-      JSON.stringify(settings)
-    );
-
-    setMessage(t("settingsSaved"));
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
+      i18n.changeLanguage(settings.language);
+      setMessageType("success");
+      setMessage(t("settingsSaved"));
+    } catch {
+      setMessageType("error");
+      setMessage(
+        isEnglish
+          ? "Settings could not be saved. Please check your browser storage."
+          : "تنظیمات ذخیره نشد. فضای ذخیره‌سازی مرورگر را بررسی کن."
+      );
+    }
   }
 
   function handleReset() {
     const resetSettings = {
       ...defaultSettings,
+      name: user?.name ?? user?.fullName ?? "",
+      email: user?.email ?? "",
       language: i18n.language === "en" ? "en" : "fa",
     };
 
     setSettings(resetSettings);
+    i18n.changeLanguage(resetSettings.language);
 
-    localStorage.setItem(
-      "nik-market-settings",
-      JSON.stringify(resetSettings)
-    );
-
-    setMessage(t("settingsReset"));
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(resetSettings));
+      setMessageType("success");
+      setMessage(t("settingsReset"));
+    } catch {
+      setMessageType("error");
+      setMessage(
+        isEnglish
+          ? "Settings were reset in this page but could not be saved."
+          : "تنظیمات در صفحه بازنشانی شد اما ذخیره نشد."
+      );
+    }
   }
 
   function SettingSwitch({ name, title, description }) {
@@ -118,13 +152,15 @@ function Settings() {
       <label className="flex cursor-pointer items-center justify-between gap-4 py-4">
         <div>
           <p className="font-semibold text-gray-700">{title}</p>
-          <p className="mt-1 text-xs text-gray-400">{description}</p>
+          <p className="mt-1 text-xs leading-6 text-gray-400">
+            {description}
+          </p>
         </div>
 
         <input
           type="checkbox"
           name={name}
-          checked={settings[name]}
+          checked={Boolean(settings[name])}
           onChange={handleChange}
           className="h-5 w-5 shrink-0 accent-[#173D35]"
         />
@@ -135,15 +171,19 @@ function Settings() {
   function SettingSelect({ name, label, children }) {
     return (
       <div>
-        <label className="mb-2 block text-sm font-semibold text-gray-700">
+        <label
+          htmlFor={`setting-${name}`}
+          className="mb-2 block text-sm font-semibold text-gray-700"
+        >
           {label}
         </label>
 
         <select
+          id={`setting-${name}`}
           name={name}
           value={settings[name]}
           onChange={handleChange}
-          className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-[#173D35]"
+          className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-700 outline-none transition focus:border-[#173D35] focus:ring-2 focus:ring-[#173D35]/10"
         >
           {children}
         </select>
@@ -154,17 +194,30 @@ function Settings() {
   function SettingInput({ name, label, placeholder, type = "text" }) {
     return (
       <div>
-        <label className="mb-2 block text-sm font-semibold text-gray-700">
+        <label
+          htmlFor={`setting-${name}`}
+          className="mb-2 block text-sm font-semibold text-gray-700"
+        >
           {label}
         </label>
 
         <input
+          id={`setting-${name}`}
           type={type}
           name={name}
-          value={settings[name]}
+          value={settings[name] ?? ""}
           onChange={handleChange}
           placeholder={placeholder}
-          className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm outline-none transition focus:border-[#173D35]"
+          autoComplete={
+            name === "name"
+              ? "name"
+              : name === "email"
+                ? "email"
+                : name === "phone"
+                  ? "tel"
+                  : "street-address"
+          }
+          className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-700 outline-none transition placeholder:text-gray-300 focus:border-[#173D35] focus:ring-2 focus:ring-[#173D35]/10"
         />
       </div>
     );
@@ -172,15 +225,17 @@ function Settings() {
 
   function Section({ icon: Icon, title, description, children }) {
     return (
-      <section className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm sm:p-8">
+      <section className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm sm:p-8">
         <div className="mb-5 flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#F5F3EE] text-[#173D35]">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#F5F3EE] text-[#173D35]">
             <Icon size={21} />
           </div>
 
           <div>
             <h2 className="font-bold text-[#173D35]">{title}</h2>
-            <p className="mt-1 text-xs text-gray-400">{description}</p>
+            <p className="mt-1 text-xs leading-6 text-gray-400">
+              {description}
+            </p>
           </div>
         </div>
 
@@ -190,13 +245,10 @@ function Settings() {
   }
 
   return (
-    <div
-      dir={isEnglish ? "ltr" : "rtl"}
-      className="min-h-screen bg-[#FAF9F6]"
-    >
+    <div dir={dir} className="min-h-screen bg-[#FAF9F6]">
       <Header search="" setSearch={() => {}} />
 
-      <main className="mx-auto max-w-5xl px-4 py-10 sm:px-6">
+      <main className="mx-auto max-w-5xl px-4 py-8 sm:px-6 sm:py-10">
         <div className="mb-8">
           <Link
             to="/"
@@ -207,15 +259,15 @@ function Settings() {
           </Link>
 
           <div className="flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#173D35] text-white">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#173D35] text-white">
               <SettingsIcon size={24} />
             </div>
 
             <div>
-              <h1 className="text-2xl font-black text-[#173D35]">
+              <h1 className="text-2xl font-black text-[#173D35] sm:text-3xl">
                 {t("settingsTitle")}
               </h1>
-              <p className="mt-1 text-sm text-gray-500">
+              <p className="mt-1 text-sm leading-6 text-gray-500">
                 {t("settingsSubtitle")}
               </p>
             </div>
@@ -238,19 +290,19 @@ function Settings() {
               <SettingInput
                 name="email"
                 label={t("settingsEmail")}
-                placeholder="example@gmail.com"
+                placeholder="example@email.com"
                 type="email"
               />
 
               <SettingInput
                 name="phone"
                 label={t("settingsPhone")}
-                placeholder="09123456789"
+                placeholder="+93 7X XXX XXXX"
                 type="tel"
               />
             </div>
 
-            <div className="mt-5 rounded-xl bg-[#F5F3EE] p-4 text-sm text-gray-600">
+            <div className="mt-5 rounded-xl bg-[#F5F3EE] p-4 text-sm leading-7 text-gray-600">
               {t("settingsSecurityNotice")}
             </div>
           </Section>
@@ -270,6 +322,9 @@ function Settings() {
               </SettingSelect>
 
               <SettingSelect name="country" label={t("settingsCountry")}>
+                <option value="afghanistan">
+                  {isEnglish ? "Afghanistan" : "افغانستان"}
+                </option>
                 <option value="iran">{t("settingsIran")}</option>
                 <option value="germany">{t("settingsGermany")}</option>
                 <option value="turkey">{t("settingsTurkey")}</option>
@@ -277,6 +332,9 @@ function Settings() {
               </SettingSelect>
 
               <SettingSelect name="currency" label={t("settingsCurrency")}>
+                <option value="afn">
+                  {isEnglish ? "Afghan Afghani (AFN)" : "افغانی (AFN)"}
+                </option>
                 <option value="toman">{t("settingsToman")}</option>
                 <option value="rial">{t("settingsRial")}</option>
                 <option value="usd">{t("settingsUSD")}</option>
@@ -290,7 +348,7 @@ function Settings() {
               </SettingSelect>
             </div>
 
-            <p className="mt-4 text-xs text-gray-400">
+            <p className="mt-4 text-xs leading-6 text-gray-400">
               {t("settingsLanguageNotice")}
             </p>
           </Section>
@@ -300,36 +358,11 @@ function Settings() {
             title={t("settingsAppearance")}
             description={t("settingsAppearanceDescription")}
           >
-            <div className="grid gap-5 sm:grid-cols-2">
-              <SettingSelect
-                name="fontSize"
-                label={t("settingsFontSize")}
-              >
-                <option value="small">{t("settingsSmall")}</option>
-                <option value="normal">{t("settingsNormal")}</option>
-                <option value="large">{t("settingsLarge")}</option>
-              </SettingSelect>
-
-              <SettingSelect name="theme" label={t("settingsSiteTheme")}>
-                <option value="light">{t("settingsLight")}</option>
-                <option value="dark">{t("settingsDark")}</option>
-                <option value="system">{t("settingsAutomatic")}</option>
-              </SettingSelect>
-            </div>
-
-            <div className="mt-4 border-t border-gray-100">
+            <div className="border-t border-gray-100">
               <SettingSwitch
                 name="compactMode"
                 title={t("settingsCompactMode")}
                 description={t("settingsCompactModeDescription")}
-              />
-
-              <div className="border-t border-gray-100" />
-
-              <SettingSwitch
-                name="reduceAnimations"
-                title={t("settingsReduceAnimations")}
-                description={t("settingsReduceAnimationsDescription")}
               />
             </div>
           </Section>
@@ -405,7 +438,7 @@ function Settings() {
               description={t("settingsPersonalizedProductsDescription")}
             />
 
-            <div className="mt-5 rounded-xl bg-[#F5F3EE] p-4 text-sm text-gray-600">
+            <div className="mt-5 rounded-xl bg-[#F5F3EE] p-4 text-sm leading-7 text-gray-600">
               {t("settingsPrivacyNotice")}
             </div>
           </Section>
@@ -463,12 +496,12 @@ function Settings() {
             </div>
           </Section>
 
-          <div className="flex flex-col gap-4 rounded-2xl border border-gray-100 bg-white p-6 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-col gap-4 rounded-2xl border border-gray-100 bg-white p-5 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:p-6">
             <div>
               <h2 className="font-bold text-[#173D35]">
                 {t("settingsManage")}
               </h2>
-              <p className="mt-1 text-xs text-gray-400">
+              <p className="mt-1 text-xs leading-6 text-gray-400">
                 {t("settingsManageDescription")}
               </p>
             </div>
@@ -494,7 +527,15 @@ function Settings() {
           </div>
 
           {message && (
-            <div className="rounded-xl border border-green-100 bg-green-50 p-4 text-center text-sm font-semibold text-green-800">
+            <div
+              role="status"
+              aria-live="polite"
+              className={`rounded-xl border p-4 text-center text-sm font-semibold ${
+                messageType === "success"
+                  ? "border-green-100 bg-green-50 text-green-800"
+                  : "border-red-100 bg-red-50 text-red-700"
+              }`}
+            >
               {message}
             </div>
           )}
