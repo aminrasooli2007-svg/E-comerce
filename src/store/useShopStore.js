@@ -1,7 +1,7 @@
-
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import { products as initialProducts } from "../data/products";
+import api from "../services/api";
 
 const initialCategories = [
   { id: "digital", name: "دیجیتال", value: "دیجیتال" },
@@ -11,7 +11,7 @@ const initialCategories = [
   { id: "beauty", name: "زیبایی", value: "زیبایی" },
 ];
 
-function normalizeProduct(product, index) {
+function normalizeProduct(product, index = 0) {
   const name = String(product.name ?? product.title ?? "");
 
   return {
@@ -74,12 +74,44 @@ const useShopStore = create(
   persist(
     (set) => ({
       products: getInitialProducts(),
+      productsLoading: false,
+      productsError: null,
       categories: initialCategories,
       cart: [],
       favorites: [],
       user: null,
       users: [],
       orders: [],
+
+      fetchProducts: async () => {
+        set({
+          productsLoading: true,
+          productsError: null,
+        });
+
+        try {
+          const data = await api.get("/products/");
+          const products = Array.isArray(data)
+            ? data
+            : data?.results ?? [];
+
+          set({
+            products: products.map(normalizeProduct),
+            productsLoading: false,
+            productsError: null,
+          });
+
+          return products;
+        } catch (error) {
+          set({
+            productsLoading: false,
+            productsError:
+              error.message || "خطا در دریافت محصولات",
+          });
+
+          throw error;
+        }
+      },
 
       addCategory: (categoryName) =>
         set((state) => {
